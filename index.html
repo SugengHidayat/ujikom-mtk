@@ -20,7 +20,9 @@
             background: var(--soft-bg);
             color: var(--text-dark);
             margin: 0;
-            padding: 20px;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
         }
 
         /* --- HALAMAN SAMBUTAN AWAL --- */
@@ -36,21 +38,20 @@
 
         .welcome-box {
             background: white;
-            padding: 40px;
+            padding: 30px 20px;
             border-radius: 20px;
             text-align: center;
-            max-width: 600px;
+            max-width: 450px;
             width: 90%;
             box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
         }
 
-        .welcome-box h1 { color: var(--primary-blue); margin-top: 0; font-size: 28px; }
-        .welcome-box p { font-size: 16px; line-height: 1.6; color: #475569; margin-bottom: 30px; }
+        .welcome-box h1 { color: var(--primary-blue); margin-top: 0; font-size: 24px; }
+        .welcome-box p { font-size: 15px; line-height: 1.6; color: #475569; margin-bottom: 25px; }
 
-        /* --- TOMBOL GO BULAT & TIMBUL --- */
         .btn-go {
-            width: 80px; height: 80px; background: var(--primary-blue); color: white; border: none;
-            border-radius: 50%; font-size: 20px; font-weight: bold; text-transform: uppercase; cursor: pointer;
+            width: 75px; height: 75px; background: var(--primary-blue); color: white; border: none;
+            border-radius: 50%; font-size: 18px; font-weight: bold; text-transform: uppercase; cursor: pointer;
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             box-shadow: 0 6px 0 var(--dark-blue), 0 4px 10px rgba(0,0,0,0.1); outline: none;
         }
@@ -66,9 +67,9 @@
             top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1000;
         }
-        .modal-box { background: white; padding: 35px; border-radius: 16px; text-align: center; max-width: 450px; width: 90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .modal-box { background: white; padding: 25px; border-radius: 16px; text-align: center; max-width: 400px; width: 85%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
         
-        input[type="text"] { width: 85%; padding: 12px 15px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 16px; margin-bottom: 15px; text-align: center; outline: none; }
+        input[type="text"] { width: 90%; padding: 12px 15px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 16px; margin-bottom: 15px; text-align: center; outline: none; }
         input[type="text"]:focus { border-color: var(--primary-blue); }
 
         .btn-playful {
@@ -79,19 +80,44 @@
         .btn-playful:hover { transform: translateY(-4px); box-shadow: 0 10px 0 var(--dark-blue); }
         .btn-playful:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--dark-blue); }
 
-        /* --- LAYOUT UTAMA DASHBOARD --- */
-        .main-container { display: none; max-width: 1300px; margin: 0 auto; gap: 20px; }
-        .soal-container { flex: 3; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        .sidebar { flex: 1; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); text-align: center; height: fit-content; }
+        /* --- ARSITEKTUR LAYOUT POTRET (MOBILE-FIRST) --- */
+        .main-container { 
+            display: none; 
+            flex-direction: column; /* Mengubah layout menjadi baris vertikal (Potret) */
+            width: 100%;
+            max-width: 500px; /* Batas lebar maksimal setara layar smartphone besar / tablet potret */
+            gap: 15px; 
+            margin: 0 auto;
+        }
 
-        /* --- PILIHAN JAWABAN --- */
-        .opsi-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+        /* Blok Info Atas (Kamera, Nama, Timer) */
+        .sidebar { 
+            background: white; 
+            padding: 15px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
+            text-align: center; 
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Blok Utama Konten Soal */
+        .soal-container { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
+        }
+
+        /* --- PILIHAN JAWABAN (RESPONSIF VERTIKAL) --- */
+        .opsi-list { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
         .opsi-card { 
-            padding: 15px 20px; 
+            padding: 14px 16px; 
             border: 2px solid #e2e8f0; 
             border-radius: 10px; 
             cursor: pointer; 
-            font-size: 16px; 
+            font-size: 15px; 
             transition: all 0.2s; 
             text-align: left; 
             display: flex; 
@@ -104,31 +130,40 @@
         .img-soal { 
             max-width: 100%; 
             height: auto;
-            max-height: 280px; 
+            max-height: 200px; /* Sedikit diperkecil agar pas dalam satu genggaman layar potret */
             object-fit: contain; 
-            border-radius: 12px; 
-            margin: 15px auto; 
+            border-radius: 10px; 
+            margin: 10px auto; 
             display: block;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            border: 2px solid #f1f5f9;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
             background-color: #ffffff;
         }
         .loading { font-size: 14px; color: #64748b; margin-top: 10px; display: none; }
 
         /* --- NAVIGASI BAWAH SOAL --- */
-        .nav-buttons { display: flex; justify-content: space-between; margin-top: 30px; }
-        .btn-nav { background: #64748b; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .nav-buttons { display: flex; justify-content: space-between; margin-top: 25px; gap: 10px; }
+        .btn-nav { flex: 1; background: #64748b; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; text-align: center; }
 
-        /* --- PROFIL KAMERA VIDEO --- */
-        .camera-box { width: 100%; height: 140px; background: #000; border-radius: 8px; margin-bottom: 15px; overflow: hidden; transform: scaleX(-1); }
+        /* --- MINI PROFIL KAMERA VIDEO --- */
+        .camera-box { 
+            width: 90px; 
+            height: 90px; 
+            background: #000; 
+            border-radius: 50%; /* Mengubah kamera menjadi bulat kecil di pojok top-layout */
+            overflow: hidden; 
+            transform: scaleX(-1); 
+            margin: 0 auto;
+            border: 3px solid var(--border-color);
+        }
         .camera-box video { width: 100%; height: 100%; object-fit: cover; }
 
         /* --- TIMER COUNTDOWN --- */
-        .timer-badge { font-size: 24px; font-weight: bold; color: #dc2626; background: #fee2e2; padding: 10px; border-radius: 8px; margin: 15px 0; font-family: monospace; }
+        .timer-badge { font-size: 20px; font-weight: bold; color: #dc2626; background: #fee2e2; padding: 8px; border-radius: 8px; margin: 5px auto; font-family: monospace; width: fit-content; }
 
         /* --- GRID NOMOR NAVIGASI --- */
-        .grid-nomor { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 15px; }
-        .box-nomor { padding: 10px 0; background: white; border: 2px solid #cbd5e1; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 14px; }
+        .grid-nomor { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 10px; }
+        .box-nomor { padding: 8px 0; background: white; border: 2px solid #cbd5e1; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 13px; }
         .box-nomor:hover { border-color: var(--primary-blue); }
         .box-nomor.sudah-jawab { background: var(--primary-blue); color: white; border-color: var(--primary-blue); }
         .box-nomor.aktif { border-color: #f59e0b; background: #fef3c7; color: #d97706; }
@@ -140,10 +175,8 @@
         <div class="welcome-box">
             <h1>Selamat Datang! ✨</h1>
             <p>
-                Selamat datang, peserta Uji Kompetensi Matematika! Tunjukkan kemampuan berpikir logis, kritis, 
-                dan kreatif yang telah kalian pelajari melalui setiap soal yang tersedia. Kerjakan dengan jujur, teliti, 
-                dan penuh percaya diri, karena setiap usaha terbaik adalah langkah menuju prestasi yang membanggakan. 
-                Ayo klik <strong>go....!</strong>.
+                Selamat datang di platform Uji Kompetensi Matematika. Kerjakan soal dengan teliti, jujur, dan penuh percaya diri ya. 
+                Ayo klik tombol <strong>go</strong> di bawah ini!
             </p>
             <button class="btn-go" onclick="bukaPopupNama()">Go</button>
         </div>
@@ -153,7 +186,7 @@
         <div class="modal-box">
             <h2>Pendaftaran Peserta</h2>
             <p>Silakan masukkan nama lengkapmu untuk memulai ujian:</p>
-            <input type="text" id="inputNama" placeholder="Contoh: Chandra Ardana Hidayat" autocomplete="off">
+            <input type="text" id="inputNama" placeholder="Contoh: Chandra Ardana" autocomplete="off">
             <div id="errorMsg" style="color: #dc2626; font-size: 14px; margin-bottom: 10px; display: none;">
                 ⚠️ Tolong masukkan nama asli yang benar ya!
             </div>
@@ -165,49 +198,56 @@
     <div id="hasilModal" class="modal-overlay" style="display: none;">
         <div class="modal-box">
             <h2>Hasil Evaluasi Ujian</h2>
-            <p id="narasiHasil" style="font-size: 18px; line-height: 1.5; color: var(--text-dark);"></p>
+            <p id="narasiHasil" style="font-size: 16px; line-height: 1.5; color: var(--text-dark);"></p>
             <br>
             <button class="btn-playful" onclick="selesaiSesi()">Keluar Sesi</button>
         </div>
     </div>
 
+    <!-- LAYOUT UTAMA SEKARANG BERBASIS VERTIKAL (POTRET) -->
     <div class="main-container" id="examLayout">
+        
+        <!-- SIDEBAR ATAS: Berisi Status Kamera, Timer & Nama Siswa -->
+        <div class="sidebar">
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <div class="camera-box">
+                    <video id="webcamVideo" autoplay playsinline muted></video>
+                </div>
+                <div style="text-align: right; flex-grow: 1; padding-right: 10px;">
+                    <h4 id="lblNamaSiswa" style="margin: 0; color: var(--primary-blue); font-size: 16px;">-</h4>
+                    <p id="lblIdSiswa" style="font-size: 11px; color: #64748b; margin: 2px 0 0 0; font-family: monospace;">-</p>
+                </div>
+            </div>
+            <div class="timer-badge" id="lblTimer">02:00:00</div>
+        </div>
+
+        <!-- CONTAINER TENGAH: Lembar Pertanyaan & Jawaban -->
         <div class="soal-container">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
-                <span style="background: #dbeafe; color: var(--primary-blue); font-weight: bold; padding: 5px 15px; border-radius: 20px; font-size: 14px;">MATEMATIKA</span>
-                <span style="font-weight: bold; color: #64748b;">Soal Nomor: <span id="lblNomorTampil">1</span></span>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">
+                <span style="background: #dbeafe; color: var(--primary-blue); font-weight: bold; padding: 4px 12px; border-radius: 20px; font-size: 12px;">MATEMATIKA</span>
+                <span style="font-weight: bold; color: #64748b; font-size: 14px;">Soal: <span id="lblNomorTampil">1</span></span>
             </div>
             
-            <div style="margin-top: 20px;">
+            <div style="margin-top: 15px;">
                 <img id="boxGambarSoal" class="img-soal" src="" style="display: none;" alt="Visual Soal">
-                <p id="boxPertanyaan" style="font-size: 18px; font-weight: 500; line-height: 1.6; min-height: 50px;"></p>
+                <p id="boxPertanyaan" style="font-size: 16px; font-weight: 500; line-height: 1.5; min-height: 40px; margin-bottom: 15px;"></p>
                 <div id="boxJawaban"></div>
             </div>
 
             <div class="nav-buttons">
-                <button class="btn-nav" onclick="navigasiSoal(-1)">⬅️ Sebelumnya</button>
-                <button class="btn-nav" onclick="navigasiSoal(1)">Berikutnya ➡️</button>
+                <button class="btn-nav" onclick="navigasiSoal(-1)">⬅️ Mundur</button>
+                <button class="btn-nav" onclick="navigasiSoal(1)">Maju ➡️</button>
             </div>
         </div>
 
-        <div class="sidebar">
-            <div class="camera-box">
-                <video id="webcamVideo" autoplay playsinline muted></video>
-            </div>
-            
-            <h3 id="lblNamaSiswa" style="margin-bottom: 5px; color: var(--primary-blue); font-size: 18px;">-</h3>
-            <p id="lblIdSiswa" style="font-size: 12px; color: #64748b; margin-top: 0; font-family: monospace;">-</p>
-            
-            <div class="timer-badge" id="lblTimer">02:00:00</div>
-            
-            <hr style="border: 1px solid #f1f5f9; margin: 15px 0;">
-            
-            <div style="text-align: left; font-weight: bold; font-size: 14px; color: #475569;">Navigasi Soal:</div>
+        <!-- GRID BAWAH: Navigasi Cepat Nomor Soal & Tombol Selesai -->
+        <div class="sidebar" style="padding: 15px;">
+            <div style="text-align: left; font-weight: bold; font-size: 13px; color: #475569;">Peta Nomor Soal:</div>
             <div class="grid-nomor" id="boxGridNomor"></div>
 
-            <hr style="border: 1px solid #f1f5f9; margin: 25px 0;">
-            <button class="btn-playful" style="background: #dc2626; box-shadow: 0 6px 0 #991b1b; width: 100%;" onclick="hitungDanSelesai(false)">
-                SELESAI UJIAN
+            <hr style="border: 1px solid #f1f5f9; margin: 15px 0;">
+            <button class="btn-playful" style="background: #dc2626; box-shadow: 0 5px 0 #991b1b; width: 100%; font-size: 15px; padding: 12px;" onclick="hitungDanSelesai(false)">
+                KUMPULKAN JAWABAN
             </button>
         </div>
     </div>
@@ -225,7 +265,7 @@
         };
 
         let intervalTimer = null;
-        let kecuranganCount = 0; // State penghitung tindakan manipulasi tab switching
+        let kecuranganCount = 0;
 
         window.onload = function() {
             if (appState.id_peserta && appState.soal.length > 0) {
@@ -234,15 +274,14 @@
             }
         };
 
-        // --- MONITORING INTEGRITAS SISTEM (ANTI-TAB SWITCHING) ---
+        // --- ANTI TAB-SWITCHING SYSTEM ---
         document.addEventListener("visibilitychange", function() {
-            // Hanya jalankan jika siswa berada di dalam layout ujian aktif
             if (document.getElementById("examLayout").style.display === "flex" && document.hidden) {
                 kecuranganCount++;
-                alert(`⚠️ PERINGATAN [${kecuranganCount}/3]: Dilarang keras keluar dari halaman atau berpindah tab ujian! Aktivitasmu dicatat oleh sistem.`);
+                alert(`⚠️ PERINGATAN [${kecuranganCount}/3]: Jangan keluar dari aplikasi! Ujianmu bisa dibatalkan otomatis.`);
                 
                 if (kecuranganCount >= 3) {
-                    alert("Batas toleransi habis. Kamu keluar halaman sebanyak 3 kali. Sesi ujian diakhiri otomatis.");
+                    alert("Kamu melanggar aturan sebanyak 3 kali. Aplikasi melakukan submit otomatis.");
                     hitungDanSelesai(true);
                 }
             }
@@ -261,7 +300,7 @@
                     video.srcObject = stream;
                 })
                 .catch(function(err) {
-                    console.log("Akses kamera ditolak/tidak ditemukan.");
+                    console.log("Akses kamera tidak aktif.");
                 });
             }
         }
@@ -279,7 +318,7 @@
                 if (sisaWaktu <= 0) {
                     clearInterval(intervalTimer);
                     document.getElementById("lblTimer").innerText = "00:00:00";
-                    alert("Waktu ujian habis! Jawaban otomatis dikirim.");
+                    alert("Waktu habis! Jawaban kamu dikirim otomatis.");
                     hitungDanSelesai(true);
                     return;
                 }
@@ -342,7 +381,7 @@
             })
             .catch(err => {
                 console.error(err);
-                alert("Terjadi gangguan koneksi jaringan internet.");
+                alert("Terjadi gangguan koneksi internet.");
             })
             .finally(() => {
                 loadingTxt.style.display = "none";
@@ -352,7 +391,7 @@
 
         function bukaHalamanUjian() {
             document.getElementById("loginModal").style.display = "none";
-            document.getElementById("examLayout").style.display = "flex";
+            document.getElementById("examLayout").style.display = "flex"; // Mengaktifkan flex potret
             document.getElementById("lblNamaSiswa").innerText = appState.nama_lengkap;
             document.getElementById("lblIdSiswa").innerText = appState.id_peserta;
             
@@ -366,12 +405,9 @@
             if (appState.soal.length === 0) return;
             
             const dataSoal = appState.soal[appState.indexAktif];
-            console.log("Data Soal Aktif:", dataSoal);
-
             document.getElementById("lblNomorTampil").innerText = appState.indexAktif + 1;
             document.getElementById("boxPertanyaan").innerText = dataSoal.pertanyaan || "";
 
-            // Render Gambar Utama Soal
             const imgBox = document.getElementById("boxGambarSoal");
             if (dataSoal.gambar && String(dataSoal.gambar).trim() !== "") {
                 imgBox.src = String(dataSoal.gambar).trim();
@@ -389,7 +425,6 @@
 
             const tipeSoal = dataSoal.jenis_soal ? String(dataSoal.jenis_soal).toUpperCase().trim() : "";
 
-            // --- DEVIASI RENDER PILIHAN GANDA (DENGAN INTEGRASI RENDERING GAMBAR OPSI) ---
             if (tipeSoal === "PG" || tipeSoal.includes("PILIHAN GANDA")) {
                 let htmlPG = `<div class="opsi-list">`;
                 
@@ -398,26 +433,25 @@
                     
                     if (isiOpsi !== undefined && String(isiOpsi).trim() !== "") {
                         const isSelected = valueJwb.toLowerCase().trim() === opsi.toLowerCase().trim() ? "selected" : "";
-                        
-                        // Evaluasi Cerdas Konten Opsi: Teks Murni vs URL Gambar CDN
                         let kontenOpsi = "";
                         const teksClean = String(isiOpsi).trim();
                         
+                        // Render Gambar di Pilihan Jawaban jika format berupa URL CDN
                         if (teksClean.startsWith("http://") || teksClean.startsWith("https://")) {
-                            kontenOpsi = `<img src="${teksClean}" style="max-height: 120px; max-width: 100%; object-fit: contain; border-radius: 6px; margin: 5px 0;" alt="Opsi ${opsi.toUpperCase()}">`;
+                            kontenOpsi = `<img src="${teksClean}" style="max-height: 100px; max-width: 100%; object-fit: contain; border-radius: 6px; margin: 3px 0;" alt="Opsi ${opsi.toUpperCase()}">`;
                         } else {
                             kontenOpsi = `<div>${isiOpsi}</div>`;
                         }
                         
                         htmlPG += `
-                            <div class="opsi-card ${isSelected}" onclick="catatJawaban('${opsi}')" style="display: flex; align-items: center; gap: 15px; padding: 12px 20px;">
+                            <div class="opsi-card ${isSelected}" onclick="catatJawaban('${opsi}')" style="gap: 12px; padding: 10px 15px;">
                                 <div style="
-                                    width: 32px; height: 32px; 
+                                    width: 30px; height: 30px; 
                                     border-radius: 50%; 
                                     background: ${isSelected ? 'var(--primary-blue)' : '#f1f5f9'}; 
                                     color: ${isSelected ? 'white' : '#64748b'}; 
                                     display: flex; align-items: center; justify-content: center; 
-                                    font-weight: bold; border: 1px solid #cbd5e1; flex-shrink: 0;">
+                                    font-weight: bold; border: 1px solid #cbd5e1; flex-shrink: 0; font-size: 13px;">
                                     ${opsi.toUpperCase()}
                                 </div>
                                 <div style="flex-grow: 1;">${kontenOpsi}</div>
@@ -428,13 +462,12 @@
                 boxJawaban.innerHTML = htmlPG;
                 
             } else if (tipeSoal === "ISIAN" || tipeSoal === "ISIAN SINGKAT" || tipeSoal === "") {
-                // Render Struktur Input untuk Jenis Isian Singkat
                 boxJawaban.innerHTML = `
-                    <div style="margin-top: 20px;">
-                        <label style="display:block; font-size:14px; font-weight:bold; color:#475569; margin-bottom:8px;">Jawaban Kamu:</label>
+                    <div style="margin-top: 15px;">
+                        <label style="display:block; font-size:13px; font-weight:bold; color:#475569; margin-bottom:6px;">Jawaban Kamu:</label>
                         <input type="text" id="fieldIsian" value="${valueJwb}" 
-                            style="text-align: left; width: 100%; max-width: 500px; padding: 12px 15px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 16px; box-sizing: border-box;" 
-                            placeholder="Ketik jawaban singkat di sini..." 
+                            style="text-align: left; width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 15px; box-sizing: border-box;" 
+                            placeholder="Ketik di sini..." 
                             oninput="catatJawaban(this.value)">
                     </div>`;
             }
@@ -508,11 +541,11 @@
 
         function hitungDanSelesai(isAutoSubmit = false) {
             if (!isAutoSubmit) {
-                if (!confirm("Apakah kamu yakin ingin mengakhiri sesi ujian?")) return;
+                if (!confirm("Apakah kamu yakin ingin mengumpulkan ujian sekarang?")) return;
             }
 
             clearInterval(intervalTimer);
-            document.getElementById("examLayout").style.opacity = "0.4";
+            document.getElementById("examLayout").style.opacity = "0.3";
 
             fetch(WEB_APP_URL, {
                 method: "POST",
@@ -530,24 +563,24 @@
                     let narasiPesan = "";
 
                     if (skor >= 80) {
-                        narasiPesan = `Hebat sekali kamu <strong>${appState.nama_lengkap}</strong>! Kamu Luar Biasa. Nilai kamu <strong>${skor}</strong>. Semangat belajar!`;
+                        narasiPesan = `Hebat sekali <strong>${appState.nama_lengkap}</strong>! Kamu Luar Biasa. Nilai kamu <strong>${skor}</strong>. Juara! 🏆`;
                     } else if (skor >= 60) {
-                        narasiPesan = `Bagus sekali kamu <strong>${appState.nama_lengkap}</strong>! Kamu Pintar. Nilai kamu <strong>${skor}</strong>. Semangat belajar!`;
+                        narasiPesan = `Bagus sekali <strong>${appState.nama_lengkap}</strong>! Kamu Pintar. Nilai kamu <strong>${skor}</strong>. Tingkatkan lagi ya! 🌟`;
                     } else {
-                        narasiPesan = `Jangan berkecil hati <strong>${appState.nama_lengkap}</strong>! Kamu Anak Hebat. Nilai kamu <strong>${skor}</strong>. Semangat belajar!`;
+                        narasiPesan = `Jangan berkecil hati <strong>${appState.nama_lengkap}</strong>! Kamu Anak Hebat. Nilai kamu <strong>${skor}</strong>. Semangat belajar! 💪`;
                     }
 
                     document.getElementById("narasiHasil").innerHTML = narasiPesan;
                     document.getElementById("hasilModal").style.display = "flex";
                     localStorage.clear();
                 } else {
-                    alert("Terjadi kendala: " + response.message);
+                    alert("Gagal: " + response.message);
                     document.getElementById("examLayout").style.opacity = "1";
                 }
             })
             .catch(err => {
                 console.error(err);
-                alert("Koneksi gagal mengirim paket data.");
+                alert("Gagal mengirim data ujian.");
                 document.getElementById("examLayout").style.opacity = "1";
             });
         }
