@@ -86,11 +86,33 @@
 
         /* --- PILIHAN JAWABAN --- */
         .opsi-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-        .opsi-card { padding: 15px 20px; border: 2px solid #e2e8f0; border-radius: 10px; cursor: pointer; font-size: 16px; transition: all 0.2s; text-align: left; }
+        .opsi-card { 
+            padding: 15px 20px; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            transition: all 0.2s; 
+            text-align: left; 
+            display: flex; 
+            align-items: center; 
+            background: #ffffff;
+        }
         .opsi-card:hover { background: #f1f5f9; border-color: #cbd5e1; }
         .opsi-card.selected { background: #eff6ff; border-color: var(--primary-blue); font-weight: bold; }
 
-        .img-soal { max-width: 100%; max-height: 250px; object-fit: contain; border-radius: 8px; margin-bottom: 15px; border: 1px solid #e2e8f0; }
+        .img-soal { 
+            max-width: 100%; 
+            height: auto;
+            max-height: 280px; 
+            object-fit: contain; 
+            border-radius: 12px; 
+            margin: 15px auto; 
+            display: block;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 2px solid #f1f5f9;
+            background-color: #ffffff;
+        }
         .loading { font-size: 14px; color: #64748b; margin-top: 10px; display: none; }
 
         /* --- NAVIGASI BAWAH SOAL --- */
@@ -118,7 +140,7 @@
         <div class="welcome-box">
             <h1>Selamat Datang! ✨</h1>
             <p>
-                Selamat datang, peserta Uji Kompetensi Matematika SMP! Tunjukkan kemampuan berpikir logis, kritis, 
+                Selamat datang, peserta Uji Kompetensi Matematika! Tunjukkan kemampuan berpikir logis, kritis, 
                 dan kreatif yang telah kalian pelajari melalui setiap soal yang tersedia. Kerjakan dengan jujur, teliti, 
                 dan penuh percaya diri, karena setiap usaha terbaik adalah langkah menuju prestasi yang membanggakan. 
                 Ayo klik <strong>go</strong>.
@@ -203,6 +225,7 @@
         };
 
         let intervalTimer = null;
+        let kecuranganCount = 0; // State penghitung tindakan manipulasi tab switching
 
         window.onload = function() {
             if (appState.id_peserta && appState.soal.length > 0) {
@@ -210,6 +233,20 @@
                 bukaHalamanUjian();
             }
         };
+
+        // --- MONITORING INTEGRITAS SISTEM (ANTI-TAB SWITCHING) ---
+        document.addEventListener("visibilitychange", function() {
+            // Hanya jalankan jika siswa berada di dalam layout ujian aktif
+            if (document.getElementById("examLayout").style.display === "flex" && document.hidden) {
+                kecuranganCount++;
+                alert(`⚠️ PERINGATAN [${kecuranganCount}/3]: Dilarang keras keluar dari halaman atau berpindah tab ujian! Aktivitasmu dicatat oleh sistem.`);
+                
+                if (kecuranganCount >= 3) {
+                    alert("Batas toleransi habis. Kamu keluar halaman sebanyak 3 kali. Sesi ujian diakhiri otomatis.");
+                    hitungDanSelesai(true);
+                }
+            }
+        });
 
         function bukaPopupNama() {
             document.getElementById("welcomeScreen").style.display = "none";
@@ -334,6 +371,7 @@
             document.getElementById("lblNomorTampil").innerText = appState.indexAktif + 1;
             document.getElementById("boxPertanyaan").innerText = dataSoal.pertanyaan || "";
 
+            // Render Gambar Utama Soal
             const imgBox = document.getElementById("boxGambarSoal");
             if (dataSoal.gambar && String(dataSoal.gambar).trim() !== "") {
                 imgBox.src = String(dataSoal.gambar).trim();
@@ -351,16 +389,28 @@
 
             const tipeSoal = dataSoal.jenis_soal ? String(dataSoal.jenis_soal).toUpperCase().trim() : "";
 
-            if (tipeSoal === "PG") {
+            // --- DEVIASI RENDER PILIHAN GANDA (DENGAN INTEGRASI RENDERING GAMBAR OPSI) ---
+            if (tipeSoal === "PG" || tipeSoal.includes("PILIHAN GANDA")) {
                 let htmlPG = `<div class="opsi-list">`;
+                
                 ['a', 'b', 'c', 'd'].forEach(opsi => {
                     const isiOpsi = dataSoal['pilihan_' + opsi] || dataSoal['PILIHAN_' + opsi.toUpperCase()] || "";
                     
                     if (isiOpsi !== undefined && String(isiOpsi).trim() !== "") {
                         const isSelected = valueJwb.toLowerCase().trim() === opsi.toLowerCase().trim() ? "selected" : "";
                         
+                        // Evaluasi Cerdas Konten Opsi: Teks Murni vs URL Gambar CDN
+                        let kontenOpsi = "";
+                        const teksClean = String(isiOpsi).trim();
+                        
+                        if (teksClean.startsWith("http://") || teksClean.startsWith("https://")) {
+                            kontenOpsi = `<img src="${teksClean}" style="max-height: 120px; max-width: 100%; object-fit: contain; border-radius: 6px; margin: 5px 0;" alt="Opsi ${opsi.toUpperCase()}">`;
+                        } else {
+                            kontenOpsi = `<div>${isiOpsi}</div>`;
+                        }
+                        
                         htmlPG += `
-                            <div class="opsi-card ${isSelected}" onclick="catatJawaban('${opsi}')" style="display: flex; align-items: center; gap: 15px;">
+                            <div class="opsi-card ${isSelected}" onclick="catatJawaban('${opsi}')" style="display: flex; align-items: center; gap: 15px; padding: 12px 20px;">
                                 <div style="
                                     width: 32px; height: 32px; 
                                     border-radius: 50%; 
@@ -370,7 +420,7 @@
                                     font-weight: bold; border: 1px solid #cbd5e1; flex-shrink: 0;">
                                     ${opsi.toUpperCase()}
                                 </div>
-                                <div>${isiOpsi}</div>
+                                <div style="flex-grow: 1;">${kontenOpsi}</div>
                             </div>`;
                     }
                 });
@@ -378,6 +428,7 @@
                 boxJawaban.innerHTML = htmlPG;
                 
             } else if (tipeSoal === "ISIAN" || tipeSoal === "ISIAN SINGKAT" || tipeSoal === "") {
+                // Render Struktur Input untuk Jenis Isian Singkat
                 boxJawaban.innerHTML = `
                     <div style="margin-top: 20px;">
                         <label style="display:block; font-size:14px; font-weight:bold; color:#475569; margin-bottom:8px;">Jawaban Kamu:</label>
@@ -401,7 +452,7 @@
             }
             
             const tipeSoal = dataSoal.jenis_soal ? String(dataSoal.jenis_soal).toUpperCase().trim() : "";
-            if (tipeSoal === "PG") {
+            if (tipeSoal === "PG" || tipeSoal.includes("PILIHAN GANDA")) {
                 tampilkanSoal();
             } else {
                 perbaruiStatusGrid();
