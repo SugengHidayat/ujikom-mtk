@@ -425,7 +425,7 @@
             const tipeSoal = dataSoal.jenis_soal ? String(dataSoal.jenis_soal).toUpperCase().trim() : "";
             const instruksiKhusus = document.getElementById("boxInstruksiKhusus");
 
-            // 1. LOGIKA UNTUK TIPE JODOHKAN / MENCOCOKKAN DROPDOWN
+            // 1. LOGIKA UNTUK TIPE JODOHKAN / MENCOCOKKAN DROPDOWN (FIX GAMBAR TAMPIL)
             if (tipeSoal === "MENCOCOKKAN" || tipeSoal === "JODOHKAN") {
                 instruksiKhusus.innerText = "💡 Cocokkanlah setiap pertanyaan/gambar dengan memilih jawaban yang tepat!";
                 instruksiKhusus.style.display = "block";
@@ -449,10 +449,17 @@
                 subPertanyaan.forEach((sub, sIdx) => {
                     const jwbSiswaSekarang = nilaiJawabanEksis[sIdx] || "";
                     
+                    // JIKA isi teks diawali dengan http/https, buat jadi elemen HTML <img>, jika tidak biarkan jadi teks biasa
+                    let kontenLabel = String(sub.teks).trim().startsWith("http")
+                        ? `<img src="${String(sub.teks).trim()}" style="max-height: 80px; max-width: 100%; object-fit: contain; border-radius: 6px; display: block;" alt="Visual Soal">`
+                        : `<div>${sub.teks}</div>`;
+                    
                     htmlMatching += `
-                        <div class="matching-row">
-                            <div class="matching-label">${sub.teks}</div>
-                            <select class="matching-select" onchange="catatJawabanMencocokkan(${sIdx}, this.value, ${subPertanyaan.length})">
+                        <div class="matching-row" style="display: flex; align-items: center; justify-content: space-between; gap: 15px; background: #ffffff; border: 2px solid #e2e8f0; padding: 12px; border-radius: 12px; margin-bottom: 8px;">
+                            <div class="matching-label" style="flex: 1; display: flex; align-items: center; justify-content: center; background: #f8fafc; padding: 6px; border-radius: 8px; border: 1px dashed #cbd5e1; min-height: 60px;">
+                                ${kontenLabel}
+                            </div>
+                            <select class="matching-select" onchange="catatJawabanMencocokkan(${sIdx}, this.value, ${subPertanyaan.length})" style="padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; background-color: white; font-size: 14px; color: var(--text-dark); max-width: 50%; flex: 1; outline: none;">
                                 <option value="">-- Pilih --</option>
                                 ${listOpsiDropdown.map(opsi => {
                                     const selected = opsi.trim() === jwbSiswaSekarang.trim() ? "selected" : "";
