@@ -126,7 +126,19 @@
         .opsi-card:hover { background: #f1f5f9; border-color: #cbd5e1; }
         .opsi-card.selected { background: #eff6ff; border-color: var(--primary-blue); font-weight: bold; }
 
-        /* Badge Instruksi Khusus PG Kompleks */
+        /* --- UI DESAIN UNTUK JENIS SOAL JODOHKAN/MENCOCOKKAN DROPDOWN --- */
+        .matching-list { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .matching-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; gap: 10px;
+        }
+        .matching-label { font-size: 14px; font-weight: 600; color: #334155; flex: 1; }
+        .matching-select {
+            padding: 10px; border: 2px solid var(--border-color); border-radius: 8px;
+            background-color: white; font-size: 14px; color: var(--text-dark); max-width: 60%; flex: 1; outline: none;
+        }
+        .matching-select:focus { border-color: var(--primary-blue); }
+
         .badge-instruksi {
             background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa;
             padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; margin-bottom: 12px;
@@ -227,7 +239,7 @@
             </div>
             
             <div style="margin-top: 15px;">
-                <div id="boxInstruksiKompleks" class="badge-instruksi" style="display: none;">💡 Kamu bisa memilih lebih dari satu jawaban benar!</div>
+                <div id="boxInstruksiKhusus" class="badge-instruksi" style="display: none;"></div>
                 <img id="boxGambarSoal" class="img-soal" src="" style="display: none;" alt="Visual Soal">
                 <p id="boxPertanyaan" style="font-size: 16px; font-weight: 500; line-height: 1.5; min-height: 40px; margin-bottom: 15px;"></p>
                 <div id="boxJawaban"></div>
@@ -395,7 +407,6 @@
             document.getElementById("lblNomorTampil").innerText = appState.indexAktif + 1;
             document.getElementById("boxPertanyaan").innerText = dataSoal.pertanyaan || "";
 
-            // Deteksi Gambar Utama Soal
             const imgBox = document.getElementById("boxGambarSoal");
             if (dataSoal.gambar && String(dataSoal.gambar).trim() !== "") {
                 imgBox.src = String(dataSoal.gambar).trim();
@@ -412,14 +423,53 @@
             const valueJwb = itemJwb ? itemJwb.jawaban : "";
 
             const tipeSoal = dataSoal.jenis_soal ? String(dataSoal.jenis_soal).toUpperCase().trim() : "";
-            const instruksiKompleks = document.getElementById("boxInstruksiKompleks");
+            const instruksiKhusus = document.getElementById("boxInstruksiKhusus");
 
-            // LOGIKA PEMILIHAN RENDER UI BERDASARKAN TIPE SOAL
-            if (tipeSoal === "PG_KOMPLEKS" || tipeSoal === "PILIHAN GANDA KOMPLEKS") {
-                instruksiKompleks.style.display = "block";
+            // 1. LOGIKA UNTUK TIPE JODOHKAN / MENCOCOKKAN DROPDOWN
+            if (tipeSoal === "MENCOCOKKAN" || tipeSoal === "JODOHKAN") {
+                instruksiKhusus.innerText = "💡 Cocokkanlah setiap pertanyaan/gambar dengan memilih jawaban yang tepat!";
+                instruksiKhusus.style.display = "block";
+                document.getElementById("lblBadgeMapel").innerText = "MENCOCOKKAN";
+
+                // Ambil daftar opsi pilihan dropdown dari kolom pilihan_e
+                const stringOpsiDropdown = dataSoal.pilihan_e || dataSoal.PILIHAN_E || "";
+                const listOpsiDropdown = stringOpsiDropdown !== "" ? stringOpsiDropdown.split(",") : [];
+
+                // Ambil daftar sub-pertanyaan dari pilihan_a sampai pilihan_d
+                const subPertanyaan = [];
+                ['a', 'b', 'c', 'd'].forEach(letter => {
+                    const isiSub = dataSoal['pilihan_' + letter] || dataSoal['PILIHAN_' + letter.toUpperCase()] || "";
+                    if (isiSub !== "") subPertanyaan.push({ kode: letter, teks: isiSub });
+                });
+
+                // Pecah jawaban siswa yang lama (contoh: "Apel,Pisang")
+                const nilaiJawabanEksis = valueJwb !== "" ? valueJwb.split(",") : Array(subPertanyaan.length).fill("");
+
+                let htmlMatching = `<div class="matching-list">`;
+                subPertanyaan.forEach((sub, sIdx) => {
+                    const jwbSiswaSekarang = nilaiJawabanEksis[sIdx] || "";
+                    
+                    htmlMatching += `
+                        <div class="matching-row">
+                            <div class="matching-label">${sub.teks}</div>
+                            <select class="matching-select" onchange="catatJawabanMencocokkan(${sIdx}, this.value, ${subPertanyaan.length})">
+                                <option value="">-- Pilih --</option>
+                                ${listOpsiDropdown.map(opsi => {
+                                    const selected = opsi.trim() === jwbSiswaSekarang.trim() ? "selected" : "";
+                                    return `<option value="${opsi.trim()}" ${selected}>${opsi.trim()}</option>`;
+                                }).join('')}
+                            </select>
+                        </div>`;
+                });
+                htmlMatching += `</div>`;
+                boxJawaban.innerHTML = htmlMatching;
+
+            // 2. LOGIKA UNTUK TIPE PG KOMPLEKS
+            } else if (tipeSoal === "PG_KOMPLEKS" || tipeSoal === "PILIHAN GANDA KOMPLEKS") {
+                instruksiKhusus.innerText = "💡 Kamu bisa memilih lebih dari satu jawaban benar!";
+                instruksiKhusus.style.display = "block";
                 document.getElementById("lblBadgeMapel").innerText = "PG KOMPLEKS";
                 
-                // Pecah string jawaban lama (misal "a,c" menjadi array ['a', 'c'])
                 const arrayJawabanSiswa = valueJwb !== "" ? valueJwb.split(",") : [];
                 let htmlPGK = `<div class="opsi-list">`;
                 
@@ -431,7 +481,6 @@
                             ? `<img src="${String(isiOpsi).trim()}" style="max-height: 100px; max-width: 100%; object-fit: contain; border-radius: 6px;" alt="Opsi">` 
                             : `<div>${isiOpsi}</div>`;
                         
-                        // Gunakan bentuk UI Kotak Centang (Square Box) untuk PG Kompleks
                         htmlPGK += `
                             <div class="opsi-card ${isSelected}" onclick="catatJawabanKompleks('${opsi}')" style="gap: 12px; padding: 10px 15px;">
                                 <div style="
@@ -451,8 +500,9 @@
                 htmlPGK += `</div>`;
                 boxJawaban.innerHTML = htmlPGK;
 
+            // 3. LOGIKA UNTUK TIPE PG BIASA
             } else if (tipeSoal === "PG" || tipeSoal.includes("PILIHAN GANDA")) {
-                instruksiKompleks.style.display = "none";
+                instruksiKhusus.style.display = "none";
                 document.getElementById("lblBadgeMapel").innerText = "MATEMATIKA";
                 
                 let htmlPG = `<div class="opsi-list">`;
@@ -464,7 +514,6 @@
                             ? `<img src="${String(isiOpsi).trim()}" style="max-height: 100px; max-width: 100%; object-fit: contain; border-radius: 6px;" alt="Opsi">` 
                             : `<div>${isiOpsi}</div>`;
                         
-                        // Gunakan bentuk UI Bulat (Radio Style) untuk PG Biasa
                         htmlPG += `
                             <div class="opsi-card ${isSelected}" onclick="catatJawabanBiasa('${opsi}')" style="gap: 12px; padding: 10px 15px;">
                                 <div style="
@@ -483,9 +532,9 @@
                 htmlPG += `</div>`;
                 boxJawaban.innerHTML = htmlPG;
                 
+            // 4. LOGIKA UNTUK TIPE ISIAN SINGKAT
             } else {
-                // Tipe Soal Isian Singkat
-                instruksiKompleks.style.display = "none";
+                instruksiKhusus.style.display = "none";
                 document.getElementById("lblBadgeMapel").innerText = "MATEMATIKA";
                 boxJawaban.innerHTML = `
                     <div style="margin-top: 15px;">
@@ -500,7 +549,7 @@
             perbaruiStatusGrid();
         }
 
-        // Handler pengisian PG Biasa & Isian
+        // Handler PG & Isian
         function catatJawabanBiasa(nilai) {
             const dataSoal = appState.soal[appState.indexAktif];
             const idSoalSekarang = String(dataSoal.nomor_soal).trim();
@@ -509,7 +558,6 @@
                 itemJwb.jawaban = nilai;
                 localStorage.setItem("jawaban", JSON.stringify(appState.jawaban));
             }
-            
             const tipeSoal = dataSoal.jenis_soal ? String(dataSoal.jenis_soal).toUpperCase().trim() : "";
             if (tipeSoal === "PG" || tipeSoal.includes("PILIHAN GANDA")) {
                 tampilkanSoal();
@@ -518,29 +566,45 @@
             }
         }
 
-        // Handler khusus PG Kompleks (bisa multi-select / mencentang lebih dari satu)
+        // Handler PG Kompleks (Multi Select)
         function catatJawabanKompleks(opsi) {
             const dataSoal = appState.soal[appState.indexAktif];
             const idSoalSekarang = String(dataSoal.nomor_soal).trim();
             let itemJwb = appState.jawaban.find(j => String(j.nomor_soal).trim() === idSoalSekarang);
-            
             if (itemJwb) {
                 let arrayJawaban = itemJwb.jawaban !== "" ? itemJwb.jawaban.split(",") : [];
-                
                 if (arrayJawaban.includes(opsi)) {
-                    // Jika opsi sudah dipilih, hapus dari daftar (uncheck)
                     arrayJawaban = arrayJawaban.filter(item => item !== opsi);
                 } else {
-                    // Jika belum dipilih, tambahkan ke daftar (check)
                     arrayJawaban.push(opsi);
                 }
-                
-                // Urutkan alfabetis agar rapi (misal: 'a,c' bukan 'c,a') lalu gabungkan kembali dengan koma
                 arrayJawaban.sort();
                 itemJwb.jawaban = arrayJawaban.join(",");
-                
                 localStorage.setItem("jawaban", JSON.stringify(appState.jawaban));
                 tampilkanSoal();
+            }
+        }
+
+        // Handler Khusus Mencocokkan Dropdown
+        function catatJawabanMencocokkan(subIndex, nilaiDipilih, totalSub) {
+            const dataSoal = appState.soal[appState.indexAktif];
+            const idSoalSekarang = String(dataSoal.nomor_soal).trim();
+            let itemJwb = appState.jawaban.find(j => String(j.nomor_soal).trim() === idSoalSekarang);
+
+            if (itemJwb) {
+                let currentAnswers = itemJwb.jawaban !== "" ? itemJwb.jawaban.split(",") : Array(totalSub).fill("");
+                
+                // Pastikan panjang array sesuai dengan total sub-soal
+                while(currentAnswers.length < totalSub) { currentAnswers.push(""); }
+                
+                // Masukkan nilai dropdown yang baru dipilih
+                currentAnswers[subIndex] = nilaiDipilih;
+                
+                // Simpan kembali menjadi satu string dipisah koma
+                itemJwb.jawaban = currentAnswers.join(",");
+                localStorage.setItem("jawaban", JSON.stringify(appState.jawaban));
+                
+                perbaruiStatusGrid();
             }
         }
 
@@ -565,8 +629,19 @@
                     el.classList.remove("sudah-jawab", "aktif");
                     const idSoalSekarang = String(s.nomor_soal).trim();
                     const itemJwb = appState.jawaban.find(j => String(j.nomor_soal).trim() === idSoalSekarang);
+                    
+                    // Kondisi valid untuk mengaktifkan status "Sudah Jawab" di peta nomor
                     if (itemJwb && String(itemJwb.jawaban).trim() !== "") {
-                        el.classList.add("sudah-jawab"); 
+                        const tipeSoal = s.jenis_soal ? String(s.jenis_soal).toUpperCase().trim() : "";
+                        
+                        // Khusus tipe mencocokkan, kotak nomor menyala biru JIKA seluruh dropdown sudah terisi penuh
+                        if (tipeSoal === "MENCOCOKKAN" || tipeSoal === "JODOHKAN") {
+                            const arr = itemJwb.jawaban.split(",");
+                            const isAllFilled = arr.length > 0 && arr.every(val => val.trim() !== "");
+                            if (isAllFilled) el.classList.add("sudah-jawab");
+                        } else {
+                            el.classList.add("sudah-jawab");
+                        }
                     }
                     if (idx === appState.indexAktif) { el.classList.add("aktif"); }
                 }
