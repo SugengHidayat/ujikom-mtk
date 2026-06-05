@@ -12,6 +12,7 @@
             --text-dark: #1e293b;
             --border-color: #cbd5e1;
             --glow-color: #60a5fa;
+            --success-green: #10b981;
         }
 
         body {
@@ -22,7 +23,7 @@
             padding: 20px;
         }
 
-        /* --- HALAMAN SAMBUTAN AWAL (WELCOME SCREEN) --- */
+        /* --- HALAMAN SAMBUTAN AWAL --- */
         .welcome-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -43,189 +44,72 @@
             box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
         }
 
-        .welcome-box h1 {
-            color: var(--primary-blue);
-            margin-top: 0;
-            font-size: 28px;
-        }
+        .welcome-box h1 { color: var(--primary-blue); margin-top: 0; font-size: 28px; }
+        .welcome-box p { font-size: 16px; line-height: 1.6; color: #475569; margin-bottom: 30px; }
 
-        .welcome-box p {
-            font-size: 16px;
-            line-height: 1.6;
-            color: #475569;
-            margin-bottom: 30px;
-        }
-
-        /* --- TOMBOL GO BULAT, TIMBUL, DAN MENYALA (GLOW) --- */
+        /* --- TOMBOL GO BULAT & TIMBUL --- */
         .btn-go {
-            width: 80px;
-            height: 80px;
-            background: var(--primary-blue);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            font-size: 20px;
-            font-weight: bold;
-            text-transform: uppercase;
-            cursor: pointer;
+            width: 80px; height: 80px; background: var(--primary-blue); color: white; border: none;
+            border-radius: 50%; font-size: 20px; font-weight: bold; text-transform: uppercase; cursor: pointer;
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 6px 0 var(--dark-blue), 0 4px 10px rgba(0,0,0,0.1);
-            outline: none;
+            box-shadow: 0 6px 0 var(--dark-blue), 0 4px 10px rgba(0,0,0,0.1); outline: none;
         }
-
         .btn-go:hover {
             transform: translateY(-6px) scale(1.05);
-            box-shadow: 0 12px 20px var(--glow-color), 0 12px 0 var(--dark-blue);
-            background: #3b82f6;
+            box-shadow: 0 12px 20px var(--glow-color), 0 12px 0 var(--dark-blue); background: #3b82f6;
         }
+        .btn-go:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--dark-blue); }
 
-        .btn-go:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0 var(--dark-blue);
-        }
-
-        /* --- POPUP / MODAL STYLE (INPUT NAMA) --- */
+        /* --- POPUP STYLE --- */
         .modal-overlay {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+            top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1000;
         }
-
-        .modal-box {
-            background: white;
-            padding: 35px;
-            border-radius: 16px;
-            text-align: center;
-            max-width: 450px;
-            width: 90%;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-        }
-
-        input[type="text"] {
-            width: 85%;
-            padding: 12px 15px;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 16px;
-            margin-bottom: 15px;
-            text-align: center;
-            outline: none;
-        }
-
-        input[type="text"]:focus {
-            border-color: var(--primary-blue);
-        }
+        .modal-box { background: white; padding: 35px; border-radius: 16px; text-align: center; max-width: 450px; width: 90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        
+        input[type="text"] { width: 85%; padding: 12px 15px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 16px; margin-bottom: 15px; text-align: center; outline: none; }
+        input[type="text"]:focus { border-color: var(--primary-blue); }
 
         .btn-playful {
-            background: var(--primary-blue);
-            color: white;
-            border: none;
-            padding: 12px 35px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: var(--primary-blue); color: white; border: none; padding: 12px 35px; font-size: 16px;
+            font-weight: bold; border-radius: 10px; cursor: pointer; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             box-shadow: 0 6px 0 var(--dark-blue);
         }
+        .btn-playful:hover { transform: translateY(-4px); box-shadow: 0 10px 0 var(--dark-blue); }
+        .btn-playful:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--dark-blue); }
 
-        .btn-playful:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 0 var(--dark-blue);
-        }
+        /* --- LAYOUT UTAMA DASHBOARD --- */
+        .main-container { display: none; max-width: 1300px; margin: 0 auto; gap: 20px; }
+        .soal-container { flex: 3; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .sidebar { flex: 1; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); text-align: center; height: fit-content; }
 
-        .btn-playful:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 var(--dark-blue);
-        }
+        /* --- PILIHAN JAWABAN --- */
+        .opsi-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+        .opsi-card { padding: 15px 20px; border: 2px solid #e2e8f0; border-radius: 10px; cursor: pointer; font-size: 16px; transition: all 0.2s; text-align: left; }
+        .opsi-card:hover { background: #f1f5f9; border-color: #cbd5e1; }
+        .opsi-card.selected { background: #eff6ff; border-color: var(--primary-blue); font-weight: bold; }
 
-        /* --- LAYOUT UTAMA UJIAN --- */
-        .main-container {
-            display: none; 
-            max-width: 1200px;
-            margin: 0 auto;
-            gap: 20px;
-        }
+        .img-soal { max-width: 100%; max-height: 250px; object-fit: contain; border-radius: 8px; margin-bottom: 15px; border: 1px solid #e2e8f0; }
+        .loading { font-size: 14px; color: #64748b; margin-top: 10px; display: none; }
 
-        .soal-container {
-            flex: 3;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-        }
+        /* --- NAVIGASI BAWAH SOAL --- */
+        .nav-buttons { display: flex; justify-content: space-between; margin-top: 30px; }
+        .btn-nav { background: #64748b; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
 
-        .sidebar {
-            flex: 1;
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            text-align: center;
-            height: fit-content;
-        }
+        /* --- PROFIL KAMERA VIDEO --- */
+        .camera-box { width: 100%; height: 140px; background: #000; border-radius: 8px; margin-bottom: 15px; overflow: hidden; transform: scaleX(-1); }
+        .camera-box video { width: 100%; height: 100%; object-fit: cover; }
 
-        .opsi-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 20px;
-        }
+        /* --- TIMER COUNTDOWN --- */
+        .timer-badge { font-size: 24px; font-weight: bold; color: #dc2626; background: #fee2e2; padding: 10px; border-radius: 8px; margin: 15px 0; font-family: monospace; }
 
-        .opsi-card {
-            padding: 15px 20px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.2s;
-        }
-
-        .opsi-card:hover {
-            background: #f1f5f9;
-            border-color: #cbd5e1;
-        }
-
-        .opsi-card.selected {
-            background: #eff6ff;
-            border-color: var(--primary-blue);
-            font-weight: bold;
-        }
-
-        .img-soal {
-            max-width: 100%;
-            max-height: 250px;
-            object-fit: contain;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .loading {
-            font-size: 14px;
-            color: #64748b;
-            margin-top: 10px;
-            display: none;
-        }
-
-        .nav-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-        }
-        .btn-nav {
-            background: #64748b;
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
+        /* --- GRID NOMOR NAVIGASI --- */
+        .grid-nomor { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 15px; }
+        .box-nomor { padding: 10px 0; background: white; border: 2px solid #cbd5e1; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 14px; }
+        .box-nomor:hover { border-color: var(--primary-blue); }
+        .box-nomor.sudah-jawab { background: var(--primary-blue); color: white; border-color: var(--primary-blue); }
+        .box-nomor.aktif { border-color: #f59e0b; background: #fef3c7; color: #d97706; }
     </style>
 </head>
 <body>
@@ -274,7 +158,8 @@
             
             <div style="margin-top: 20px;">
                 <img id="boxGambarSoal" class="img-soal" src="" style="display: none;" alt="Visual Soal">
-                <p id="boxPertanyaan" style="font-size: 18px; font-weight: 500; line-height: 1.6;"></p>
+                <p id="boxPertanyaan" style="font-size: 18px; font-weight: 500; line-height: 1.6; min-height: 50px;"></p>
+                
                 <div id="boxJawaban"></div>
             </div>
 
@@ -285,17 +170,29 @@
         </div>
 
         <div class="sidebar">
-            <h3 id="lblNamaSiswa" style="margin-bottom: 5px; color: var(--primary-blue);">-</h3>
-            <p id="lblIdSiswa" style="font-size: 13px; color: #64748b; margin-top: 0; font-family: monospace;">-</p>
-            <hr style="border: 1px solid #f1f5f9; margin: 20px 0;">
+            <div class="camera-box">
+                <video id="webcamVideo" autoplay playsinline muted></video>
+            </div>
             
-            <button class="btn-playful" style="background: #dc2626; box-shadow: 0 6px 0 #991b1b; width: 100%;" onclick="hitungDanSelesai()">
+            <h3 id="lblNamaSiswa" style="margin-bottom: 5px; color: var(--primary-blue); font-size: 18px;">-</h3>
+            <p id="lblIdSiswa" style="font-size: 12px; color: #64748b; margin-top: 0; font-family: monospace;">-</p>
+            
+            <div class="timer-badge" id="lblTimer">02:00:00</div>
+            
+            <hr style="border: 1px solid #f1f5f9; margin: 15px 0;">
+            
+            <div style="text-align: left; font-weight: bold; font-size: 14px; color: #475569;">Navigasi Soal:</div>
+            <div class="grid-nomor" id="boxGridNomor"></div>
+
+            <hr style="border: 1px solid #f1f5f9; margin: 25px 0;">
+            <button class="btn-playful" style="background: #dc2626; box-shadow: 0 6px 0 #991b1b; width: 100%;" onclick="hitungDanSelesai(false)">
                 SELESAI UJIAN
             </button>
         </div>
     </div>
 
     <script>
+        // URL Web App Google Apps Script Anda
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwrFgHtmOeGSXRZrbHSoNcT1CpWh4leleEKsZw7wdWUgNihJxKndxwMPP3DBT128aWGWg/exec";
 
         let appState = {
@@ -303,11 +200,13 @@
             nama_lengkap: localStorage.getItem("nama_lengkap") || "",
             soal: JSON.parse(localStorage.getItem("soal")) || [],
             jawaban: JSON.parse(localStorage.getItem("jawaban")) || [],
-            indexAktif: 0
+            indexAktif: 0,
+            waktuSelesai: localStorage.getItem("waktu_selesai") || null
         };
 
+        let intervalTimer = null;
+
         window.onload = function() {
-            // Anti-Refresh: Jika siswa tidak sengaja refresh, langsung kembalikan ke layout ujian jika session aktif
             if (appState.id_peserta && appState.soal.length > 0) {
                 document.getElementById("welcomeScreen").style.display = "none";
                 bukaHalamanUjian();
@@ -319,11 +218,58 @@
             document.getElementById("loginModal").style.display = "flex";
         }
 
+        // Fungsi Aktivasi Kamera Pengawas Siswa
+        function aktifkanKameraPengawas() {
+            const video = document.getElementById("webcamVideo");
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+                .then(function(stream) {
+                    video.srcObject = stream;
+                })
+                .catch(function(err) {
+                    console.log("Akses kamera ditolak atau tidak tersedia: ", err);
+                });
+            }
+        }
+
+        // Jalankan Timer Hitung Mundur 120 Menit (Jam:Menit:Detik)
+        function mulaiTimerUjian() {
+            if (!appState.waktuSelesai) {
+                // Konfigurasi durasi 120 menit dari sekarang
+                const durasiMilidetik = 120 * 60 * 1000; 
+                appState.waktuSelesai = Date.now() + durasiMilidetik;
+                localStorage.setItem("waktu_selesai", appState.waktuSelesai);
+            }
+
+            function updateTimer() {
+                const sisaWaktu = appState.waktuSelesai - Date.now();
+
+                if (sisaWaktu <= 0) {
+                    clearInterval(intervalTimer);
+                    document.getElementById("lblTimer").innerText = "00:00:00";
+                    alert("Waktu ujian telah habis! Sistem otomatis mengirimkan jawaban Anda.");
+                    hitungDanSelesai(true); // Auto-submit jika waktu habis
+                    return;
+                }
+
+                const jam = Math.floor((sisaWaktu / (1000 * 60 * 60)) % 24);
+                const menit = Math.floor((sisaWaktu / (1000 * 60)) % 60);
+                const detik = Math.floor((sisaWaktu / 1000) % 60);
+
+                // Format penulisan agar dua digit padStart (00:00:00)
+                document.getElementById("lblTimer").innerText = 
+                    `${String(jam).padStart(2,'0')}:${String(menit).padStart(2,'0')}:${String(detik).padStart(2,'0')}`;
+            }
+
+            updateTimer();
+            intervalTimer = setInterval(updateTimer, 1000);
+        }
+
         function validasiNamaSiswa(nama) {
             const namaClean = nama.trim().toLowerCase();
             if (namaClean.length < 3) return false;
-            if (/(.)\1{3,}/.test(namaClean)) return false; // Blokir repetisi huruf sama berturut-turut
-            if (/[bcdfghjklmnpqrstvwxyz]{5,}/.test(namaClean)) return false; // Blokir string konsonan asal keyboard
+            if (/(.)\1{3,}/.test(namaClean)) return false; 
+            if (/[bcdfghjklmnpqrstvwxyz]{5,}/.test(namaClean)) return false; 
             return true;
         }
 
@@ -351,7 +297,7 @@
                     appState.id_peserta = response.id_peserta;
                     appState.nama_lengkap = inputNama;
                     
-                    // Shuffling (Mengacak susunan urutan soal)
+                    // Shuffling acak soal
                     appState.soal = response.soal.sort(() => Math.random() - 0.5);
                     appState.jawaban = appState.soal.map(s => ({ nomor_soal: s.nomor_soal, jawaban: "" }));
 
@@ -380,10 +326,16 @@
             document.getElementById("examLayout").style.display = "flex";
             document.getElementById("lblNamaSiswa").innerText = appState.nama_lengkap;
             document.getElementById("lblIdSiswa").innerText = appState.id_peserta;
+            
+            aktifkanKameraPengawas();
+            mulaiTimerUjian();
             tampilkanSoal();
+            buatGridNavigasi();
         }
 
         function tampilkanSoal() {
+            if(appState.soal.length === 0) return;
+            
             const dataSoal = appState.soal[appState.indexAktif];
             document.getElementById("lblNomorTampil").innerText = appState.indexAktif + 1;
             document.getElementById("boxPertanyaan").innerText = dataSoal.pertanyaan;
@@ -402,11 +354,12 @@
             const itemJwb = appState.jawaban.find(j => j.nomor_soal == dataSoal.nomor_soal);
             const valueJwb = itemJwb ? itemJwb.jawaban : "";
 
+            // MERENDER PILIHAN JAWABAN SECARA DINAMIS
             if (dataSoal.jenis_soal === "PG") {
                 let htmlPG = `<div class="opsi-list">`;
                 ['a', 'b', 'c', 'd'].forEach(opsi => {
                     const isiOpsi = dataSoal['pilihan_' + opsi];
-                    if(isiOpsi) {
+                    if(isiOpsi !== undefined && isiOpsi !== "") {
                         const isSelected = valueJwb.toLowerCase() === opsi.toLowerCase() ? "selected" : "";
                         htmlPG += `
                             <div class="opsi-card ${isSelected}" onclick="catatJawaban('${opsi}')">
@@ -422,6 +375,8 @@
                         <input type="text" id="fieldIsian" value="${valueJwb}" style="text-align: left; width: 100%; box-sizing: border-box;" placeholder="Ketik jawaban singkat kamu di sini..." oninput="catatJawaban(this.value)">
                     </div>`;
             }
+
+            perbaruiStatusGrid();
         }
 
         function catatJawaban(nilai) {
@@ -433,20 +388,66 @@
             }
             if(dataSoal.jenis_soal === "PG") {
                 tampilkanSoal();
+            } else {
+                perbaruiStatusGrid();
             }
         }
 
-        function navigasiSoal(arah) {
-            const targetIndex = appState.indexAktif + arah;
-            if (targetIndex >= 0 && targetIndex < appState.soal.length) {
-                appState.indexAktif = targetIndex;
+        // MEMBUAT GRID NOMOR NAVIGASI SOAL DI PANEL KANAN
+        function buatGridNavigasi() {
+            const containerGrid = document.getElementById("boxGridNomor");
+            containerGrid.innerHTML = "";
+
+            appState.soal.forEach((s, idx) => {
+                const btnNomor = document.createElement("button");
+                btnNomor.className = "box-nomor";
+                btnNomor.id = "nav-no-" + idx;
+                btnNomor.innerText = idx + 1;
+                btnNomor.onclick = function() {
+                    lompatKeSoal(idx);
+                };
+                containerGrid.appendChild(btnNomor);
+            });
+            perbaruiStatusGrid();
+        }
+
+        // MEMPERBARUI INDIKATOR WARNA MAP GRIDS NOMOR
+        function perbaruiStatusGrid() {
+            appState.soal.forEach((s, idx) => {
+                const el = document.getElementById("nav-no-" + idx);
+                if (el) {
+                    // Reset kelas bawaan
+                    el.classList.remove("sudah-jawab", "aktif");
+
+                    const itemJwb = appState.jawaban.find(j => j.nomor_soal == s.nomor_soal);
+                    if (itemJwb && itemJwb.jawaban.trim() !== "") {
+                        el.classList.add("sudah-jawab"); // Warna biru jika diisi
+                    }
+
+                    if (idx === appState.indexAktif) {
+                        el.classList.add("aktif"); // Border kuning penanda posisi aktif
+                    }
+                }
+            });
+        }
+
+        function lompatKeSoal(indexTarget) {
+            if (indexTarget >= 0 && indexTarget < appState.soal.length) {
+                appState.indexAktif = indexTarget;
                 tampilkanSoal();
             }
         }
 
-        function hitungDanSelesai() {
-            if (!confirm("Apakah kamu yakin ingin mengakhiri sesi ujian dan mengirim semua jawaban?")) return;
+        function navigasiSoal(arah) {
+            lompatKeSoal(appState.indexAktif + arah);
+        }
 
+        function hitungDanSelesai(isAutoSubmit = false) {
+            if (!isAutoSubmit) {
+                if (!confirm("Apakah kamu yakin ingin mengakhiri sesi ujian dan mengirim semua jawaban?")) return;
+            }
+
+            clearInterval(intervalTimer);
             document.getElementById("examLayout").style.opacity = "0.4";
 
             fetch(WEB_APP_URL, {
