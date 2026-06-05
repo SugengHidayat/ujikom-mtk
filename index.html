@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Ujian Kompetensi Matematika SD</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --soft-bg: #f8fafc;
+            --text-color: #1e293b;
+            --bubblegum-playful: #f59e0b;
+        }
+        body { font-family: 'Comic Sans MS', 'Segoe UI', sans-serif; background: var(--soft-bg); color: var(--text-color); margin: 0; padding: 20px; }
+        
+        /* Modal / Popup Style */
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 999; }
+        .modal-box { background: white; padding: 30px; border-radius: 16px; text-align: center; max-width: 450px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        
+        /* Form Input */
+        input[type="text"] { width: 80%; padding: 12px; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 16px; margin-bottom: 15px; text-align: center; }
+        
+        /* Animasi Timbul Tombol (Micro-interaction) */
+        .btn-playful {
+            background: var(--primary-color); color: white; border: none; padding: 12px 30px; font-size: 18px; font-weight: bold; border-radius: 12px; cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 6px 0 #1d4ed8;
+        }
+        .btn-playful:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 0 #1d4ed8;
+        }
+        .btn-playful:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #1d4ed8;
+        }
+
+        /* Layout Ujian Utama */
+        .main-container { display: flex; gap: 20px; max-width: 1200px; margin: 0 auto; display: none; }
+        .soal-area { flex: 3; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .sidebar { flex: 1; background: white; padding: 20px; border-radius: 12px; text-align: center; }
+        
+        /* Opsi Pilihan Ganda & Gambar */
+        .opsi-container { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .opsi-item { padding: 15px; border: 2px solid #e2e8f0; border-radius: 10px; cursor: pointer; transition: 0.2s; font-size: 16px; }
+        .opsi-item:hover { background: #eff6ff; border-color: var(--primary-color); }
+        .img-soal { max-width: 100%; height: auto; border-radius: 8px; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal-box">
+            <h2>Halo Sahabat Pintar! 👋</h2>
+            <p>Masukkan nama lengkapmu untuk memulai ujian ya:</p>
+            <input type="text" id="inputNama" placeholder="Contoh: Chandra Ardana Hidayat" autocomplete="off">
+            <p id="errorMsg" style="color: red; font-size: 14px; display: none;">Yuk, masukkan nama aslimu dengan benar ya!</p>
+            <br>
+            <button class="btn-playful" onclick="prosesLogin()">Mulai Ujian</button>
+        </div>
+    </div>
+
+    <div id="hasilModal" class="modal-overlay" style="display: none;">
+        <div class="modal-box">
+            <h2>Ujian Selesai! 🎉</h2>
+            <p id="narasiHasil"></p>
+            <button class="btn-playful" onclick="location.reload()">Tutup</button>
+        </div>
+    </div>
+
+    <div class="main-container" id="examContainer">
+        <div class="soal-area">
+            <h3 id="infoMataPelajaran">MATEMATIKA - Soal No: <span id="noUrutTampil">1</span></h3>
+            <hr>
+            <div id="kontenSoal">
+                <img id="gambarSoal" class="img-soal" src="" style="display: none;" alt="Visual Soal">
+                <p id="teksPertanyaan" style="font-size: 18px; font-weight: bold;"></p>
+                <div id="areaInputJawaban"></div>
+            </div>
+        </div>
+        
+        <div class="sidebar">
+            <h4 id="namaSiswaTampil">Peserta: -</h4>
+            <small id="idSiswaTampil">ID: -</small>
+            <hr>
+            <button class="btn-playful" style="background: #dc2626; box-shadow: 0 6px 0 #b91c1c; width: 100%;" onclick="selesaiUjian()">SELESAI UJIAN</button>
+        </div>
+    </div>
+
+    <script>
+        // GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
+        const WEB_APP_URL = "https://script.google.com/macros/s/.../exec"; 
+
+        let state = {
+            id_peserta: localStorage.getItem("id_peserta") || "",
+            nama_lengkap: localStorage.getItem("nama_lengkap") || "",
+            soal: JSON.parse(localStorage.getItem("soal")) || [],
+            jawaban: JSON.parse(localStorage.getItem("jawaban")) || [],
+            indeksAktif: 0
+        };
+
+        window.onload = function() {
+            if (state.id_peserta && state.soal.length > 0) {
+                tampilkanHalamanUjian();
+            }
+        };
+
+        function validasiNama(nama) {
+            // Deteksi nama terlalu pendek atau mengandung pola acak keyboard (e.g. xxxxx, asdasd, hgjgjg)
+            const cekGaje = /(.)\1{4,}/g; // Huruf berulang 5x berturut-turut
+            const polaKeyboard = /[bcdfghjklmnpqrstvwxyz]{5,}/i; // 5 huruf mati berurutan
+            if (nama.trim().length < 3 || cekGaje.test(nama) || polaKeyboard.test(nama)) {
+                return false;
+            }
+            return true;
+        }
+
+        function prosesLogin() {
+            const namaInput = document.getElementById("inputNama").value;
+            const errorMsg = document.getElementById("errorMsg");
+
+            if (!validasiNama(namaInput)) {
+                errorMsg.style.display = "block";
+                return;
+            }
+            errorMsg.style.display = "none";
+
+            // Kirim ke Google Sheets API
+            fetch(WEB_APP_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "loginPeserta", nama_lengkap: namaInput })
+            })
+            .then(res => res.json())
+            .then(resData => {
+                if (resData.status === "success") {
+                    state.id_peserta = resData.id_peserta;
+                    state.nama_lengkap = namaInput;
+                    // ACAK SOAL (Shuffle Fisher-Yates) secara permanen di awal ujian
+                    state.soal = resData.soal.sort(() => Math.random() - 0.5);
+                    state.jawaban = state.soal.map(s => ({ nomor_soal: s.nomor_soal, jawaban: "" }));
+                    
+                    // Simpan ke localstorage biar anti-refresh
+                    localStorage.setItem("id_peserta", state.id_peserta);
+                    localStorage.setItem("nama_lengkap", state.nama_lengkap);
+                    localStorage.setItem("soal", JSON.stringify(state.soal));
+                    localStorage.setItem("jawaban", JSON.stringify(state.jawaban));
+
+                    tampilkanHalamanUjian();
+                }
+            });
+        }
+
+        function tampilkanHalamanUjian() {
+            document.getElementById("loginModal").style.display = "none";
+            document.getElementById("examContainer").style.display = "flex";
+            document.getElementById("namaSiswaTampil").innerText = state.nama_lengkap;
+            document.getElementById("idSiswaTampil").innerText = "ID: " + state.id_peserta;
+            renderSoal();
+        }
+
+        function renderSoal() {
+            const soalAktif = state.soal[state.indeksAktif];
+            document.getElementById("noUrutTampil").innerText = state.indeksAktif + 1;
+            document.getElementById("teksPertanyaan").innerText = soalAktif.pertanyaan;
+
+            // Render Gambar jika ada di database
+            const imgEl = document.getElementById("gambarSoal");
+            if (soalAktif.gambar && soalAktif.gambar !== "") {
+                imgEl.src = soalAktif.gambar;
+                imgEl.style.display = "block";
+            } else {
+                imgEl.style.display = "none";
+            }
+
+            const containerJawaban = document.getElementById("areaInputJawaban");
+            containerJawaban.innerHTML = "";
+
+            const curJwb = state.jawaban.find(j => j.nomor_soal == soalAktif.nomor_soal).jawaban;
+
+            if (soalAktif.jenis_soal === "PG") {
+                let htmlOpsi = `<div class="opsi-container">`;
+                ['a', 'b', 'c', 'd'].forEach(opsi => {
+                    const statusTerpilih = curJwb.toUpperCase() === opsi.toUpperCase() ? "background:#bfdbfe; border-color:#2563eb;" : "";
+                    htmlOpsi += `<div class="opsi-item" style="${statusTerpilih}" onclick="simpanJawaban('${opsi}')">
+                        <strong>${opsi.toUpperCase()}.</strong> ${soalAktif['pilihan_' + opsi]}
+                    </div>`;
+                });
+                htmlOpsi += `</div>`;
+                containerJawaban.innerHTML = htmlOpsi;
+            } else if (soalAktif.jenis_soal === "ISIAN") {
+                containerJawaban.innerHTML = `
+                    <input type="text" id="isianUser" value="${curJwb}" placeholder="Ketik jawaban singkat di sini..." oninput="simpanJawaban(this.value)">
+                `;
+            }
+        }
+
+        function simpanJawaban(nilaiJawaban) {
+            const soalAktif = state.soal[state.indeksAktif];
+            let jwbObj = state.jawaban.find(j => j.nomor_soal == soalAktif.nomor_soal);
+            jwbObj.jawaban = nilaiJawaban;
+            localStorage.setItem("jawaban", JSON.stringify(state.jawaban));
+            
+            // Re-render khusus PG untuk efek seleksi warna visual
+            if(soalAktif.jenis_soal === "PG") renderSoal(); 
+        }
+
+        function selesaiUjian() {
+            if(!confirm("Apakah kamu yakin ingin menyelesaikan ujian ini?")) return;
+
+            fetch(WEB_APP_URL, {
+                method: "POST",
+                body: JSON.stringify({
+                    action: "submitUjian",
+                    id_peserta: state.id_peserta,
+                    nama_lengkap: state.nama_lengkap,
+                    jawaban: state.jawaban
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    let narasi = "";
+                    if (data.nilai >= 80) {
+                        narasi = `Hebat sekali kamu <strong>${state.nama_lengkap}</strong>! Nilai kamu <strong>${data.nilai}</strong>. Pertahankan prestasimu dan Tetap Semangat Belajar!`;
+                    } else if (data.nilai >= 60) {
+                        narasi = `Bagus sekali kamu <strong>${state.nama_lengkap}</strong>! Nilai kamu <strong>${data.nilai}</strong>. Sedikit lagi kamu pasti bisa meraih nilai sempurna. Semangat belajar!`;
+                    } else {
+                        narasi = `Jangan berkecil hati <strong>${state.nama_lengkap}</strong>! Nilai kamu <strong>${data.nilai}</strong>. Kamu anak hebat, yuk belajar lebih giat lagi. Semangat belajar!`;
+                    }
+
+                    document.getElementById("narasiHasil").innerHTML = narasi;
+                    document.getElementById("hasilModal").style.display = "flex";
+                    
+                    // Bersihkan Session
+                    localStorage.clear();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
