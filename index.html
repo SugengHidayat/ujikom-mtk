@@ -193,304 +193,326 @@
 
     <script>
         // URL Web App Google Apps Script Anda
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwrFgHtmOeGSXRZrbHSoNcT1CpWh4leleEKsZw7wdWUgNihJxKndxwMPP3DBT128aWGWg/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwrFgHtmOeGSXRZrbHSoNcT1CpWh4leleEKsZw7wdWUgNihJxKndxwMPP3DBT128aWGWg/exec";
 
-        let appState = {
-            id_peserta: localStorage.getItem("id_peserta") || "",
-            nama_lengkap: localStorage.getItem("nama_lengkap") || "",
-            soal: JSON.parse(localStorage.getItem("soal")) || [],
-            jawaban: JSON.parse(localStorage.getItem("jawaban")) || [],
-            indexAktif: 0,
-            waktuSelesai: localStorage.getItem("waktu_selesai") || null
-        };
+let appState = {
+    id_peserta: localStorage.getItem("id_peserta") || "",
+    nama_lengkap: localStorage.getItem("nama_lengkap") || "",
+    soal: JSON.parse(localStorage.getItem("soal")) || [],
+    jawaban: JSON.parse(localStorage.getItem("jawaban")) || [],
+    indexAktif: 0,
+    waktuSelesai: localStorage.getItem("waktu_selesai") || null
+};
 
-        let intervalTimer = null;
+let intervalTimer = null;
 
-        window.onload = function() {
-            if (appState.id_peserta && appState.soal.length > 0) {
-                document.getElementById("welcomeScreen").style.display = "none";
-                bukaHalamanUjian();
-            }
-        };
+window.onload = function() {
+    if (appState.id_peserta && appState.soal.length > 0) {
+        document.getElementById("welcomeScreen").style.display = "none";
+        bukaHalamanUjian();
+    }
+};
 
-        function bukaPopupNama() {
-            document.getElementById("welcomeScreen").style.display = "none";
-            document.getElementById("loginModal").style.display = "flex";
+function bukaPopupNama() {
+    document.getElementById("welcomeScreen").style.display = "none";
+    document.getElementById("loginModal").style.display = "flex";
+}
+
+function aktifkanKameraPengawas() {
+    const video = document.getElementById("webcamVideo");
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+        .then(function(stream) {
+            video.srcObject = stream;
+        })
+        .catch(function(err) {
+            console.log("Akses kamera ditolak atau tidak tersedia: ", err);
+        });
+    }
+}
+
+function mulaiTimerUjian() {
+    if (!appState.waktuSelesai) {
+        const durasiMilidetik = 120 * 60 * 1000; 
+        appState.waktuSelesai = Date.now() + durasiMilidetik;
+        localStorage.setItem("waktu_selesai", appState.waktuSelesai);
+    }
+
+    function updateTimer() {
+        const sisaWaktu = appState.waktuSelesai - Date.now();
+
+        if (sisaWaktu <= 0) {
+            clearInterval(intervalTimer);
+            document.getElementById("lblTimer").innerText = "00:00:00";
+            alert("Waktu ujian telah habis! Sistem otomatis mengirimkan jawaban Anda.");
+            hitungDanSelesai(true);
+            return;
         }
 
-        // Fungsi Aktivasi Kamera Pengawas Siswa
-        function aktifkanKameraPengawas() {
-            const video = document.getElementById("webcamVideo");
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-                .then(function(stream) {
-                    video.srcObject = stream;
-                })
-                .catch(function(err) {
-                    console.log("Akses kamera ditolak atau tidak tersedia: ", err);
-                });
-            }
-        }
+        const jam = Math.floor((sisaWaktu / (1000 * 60 * 60)) % 24);
+        const menit = Math.floor((sisaWaktu / (1000 * 60)) % 60);
+        const detik = Math.floor((sisaWaktu / 1000) % 60);
 
-        // Jalankan Timer Hitung Mundur 120 Menit (Jam:Menit:Detik)
-        function mulaiTimerUjian() {
-            if (!appState.waktuSelesai) {
-                // Konfigurasi durasi 120 menit dari sekarang
-                const durasiMilidetik = 120 * 60 * 1000; 
-                appState.waktuSelesai = Date.now() + durasiMilidetik;
-                localStorage.setItem("waktu_selesai", appState.waktuSelesai);
-            }
+        document.getElementById("lblTimer").innerText = 
+            `${String(jam).padStart(2,'0')}:${String(menit).padStart(2,'0')}:${String(detik).padStart(2,'0')}`;
+    }
 
-            function updateTimer() {
-                const sisaWaktu = appState.waktuSelesai - Date.now();
+    updateTimer();
+    intervalTimer = setInterval(updateTimer, 1000);
+}
 
-                if (sisaWaktu <= 0) {
-                    clearInterval(intervalTimer);
-                    document.getElementById("lblTimer").innerText = "00:00:00";
-                    alert("Waktu ujian telah habis! Sistem otomatis mengirimkan jawaban Anda.");
-                    hitungDanSelesai(true); // Auto-submit jika waktu habis
-                    return;
-                }
+function validasiNamaSiswa(nama) {
+    const namaClean = nama.trim().toLowerCase();
+    if (namaClean.length < 3) return false;
+    if (/(.)\1{3,}/.test(namaClean)) return false; 
+    if (/[bcdfghjklmnpqrstvwxyz]{5,}/.test(namaClean)) return false; 
+    return true;
+}
 
-                const jam = Math.floor((sisaWaktu / (1000 * 60 * 60)) % 24);
-                const menit = Math.floor((sisaWaktu / (1000 * 60)) % 60);
-                const detik = Math.floor((sisaWaktu / 1000) % 60);
+function prosesLogin() {
+    const inputNama = document.getElementById("inputNama").value;
+    const errorMsg = document.getElementById("errorMsg");
+    const loadingTxt = document.getElementById("loadingTxt");
+    const btnSubmit = document.getElementById("btnSubmitLogin");
 
-                // Format penulisan agar dua digit padStart (00:00:00)
-                document.getElementById("lblTimer").innerText = 
-                    `${String(jam).padStart(2,'0')}:${String(menit).padStart(2,'0')}:${String(detik).padStart(2,'0')}`;
-            }
+    if (!validasiNamaSiswa(inputNama)) {
+        errorMsg.style.display = "block";
+        return;
+    }
+    errorMsg.style.display = "none";
+    loadingTxt.style.display = "block";
+    btnSubmit.disabled = true;
 
-            updateTimer();
-            intervalTimer = setInterval(updateTimer, 1000);
-        }
-
-        function validasiNamaSiswa(nama) {
-            const namaClean = nama.trim().toLowerCase();
-            if (namaClean.length < 3) return false;
-            if (/(.)\1{3,}/.test(namaClean)) return false; 
-            if (/[bcdfghjklmnpqrstvwxyz]{5,}/.test(namaClean)) return false; 
-            return true;
-        }
-
-        function prosesLogin() {
-            const inputNama = document.getElementById("inputNama").value;
-            const errorMsg = document.getElementById("errorMsg");
-            const loadingTxt = document.getElementById("loadingTxt");
-            const btnSubmit = document.getElementById("btnSubmitLogin");
-
-            if (!validasiNamaSiswa(inputNama)) {
-                errorMsg.style.display = "block";
-                return;
-            }
-            errorMsg.style.display = "none";
-            loadingTxt.style.display = "block";
-            btnSubmit.disabled = true;
-
-            fetch(WEB_APP_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: "loginPeserta", nama_lengkap: inputNama })
-            })
-            .then(res => res.json())
-            .then(response => {
-                if (response.status === "success") {
-                    appState.id_peserta = response.id_peserta;
-                    appState.nama_lengkap = inputNama;
-                    
-                    // Shuffling acak soal
-                    appState.soal = response.soal.sort(() => Math.random() - 0.5);
-                    appState.jawaban = appState.soal.map(s => ({ nomor_soal: s.nomor_soal, jawaban: "" }));
-
-                    localStorage.setItem("id_peserta", appState.id_peserta);
-                    localStorage.setItem("nama_lengkap", appState.nama_lengkap);
-                    localStorage.setItem("soal", JSON.stringify(appState.soal));
-                    localStorage.setItem("jawaban", JSON.stringify(appState.jawaban));
-
-                    bukaHalamanUjian();
-                } else {
-                    alert("Gagal memuat bank soal: " + response.message);
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                alert("Terjadi gangguan koneksi jaringan internet.");
-            })
-            .finally(() => {
-                loadingTxt.style.display = "none";
-                btnSubmit.disabled = false;
-            });
-        }
-
-        function bukaHalamanUjian() {
-            document.getElementById("loginModal").style.display = "none";
-            document.getElementById("examLayout").style.display = "flex";
-            document.getElementById("lblNamaSiswa").innerText = appState.nama_lengkap;
-            document.getElementById("lblIdSiswa").innerText = appState.id_peserta;
+    fetch(WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "loginPeserta", nama_lengkap: inputNama })
+    })
+    .then(res => res.json())
+    .then(response => {
+        if (response.status === "success") {
+            appState.id_peserta = response.id_peserta;
+            appState.nama_lengkap = inputNama;
             
-            aktifkanKameraPengawas();
-            mulaiTimerUjian();
-            tampilkanSoal();
-            buatGridNavigasi();
+            // Shuffling acak soal
+            appState.soal = response.soal.sort(() => Math.random() - 0.5);
+            appState.jawaban = appState.soal.map(s => ({ nomor_soal: s.nomor_soal, jawaban: "" }));
+
+            localStorage.setItem("id_peserta", appState.id_peserta);
+            localStorage.setItem("nama_lengkap", appState.nama_lengkap);
+            localStorage.setItem("soal", JSON.stringify(appState.soal));
+            localStorage.setItem("jawaban", JSON.stringify(appState.jawaban));
+
+            bukaHalamanUjian();
+        } else {
+            alert("Gagal memuat bank soal: " + response.message);
         }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Terjadi gangguan koneksi jaringan internet.");
+    })
+    .finally(() => {
+        loadingTxt.style.display = "none";
+        btnSubmit.disabled = false;
+    });
+}
 
-        function tampilkanSoal() {
-            if(appState.soal.length === 0) return;
+function bukaHalamanUjian() {
+    document.getElementById("loginModal").style.display = "none";
+    document.getElementById("examLayout").style.display = "flex";
+    document.getElementById("lblNamaSiswa").innerText = appState.nama_lengkap;
+    document.getElementById("lblIdSiswa").innerText = appState.id_peserta;
+    
+    aktifkanKameraPengawas();
+    mulaiTimerUjian();
+    tampilkanSoal();
+    buatGridNavigasi();
+}
+
+// ====================================================================
+// FUNGSI UTAMA RENDER SOAL (SUDAH DIPERBAIKI SESUAI STRUKTUR KOLOM)
+// ====================================================================
+function tampilkanSoal() {
+    if(appState.soal.length === 0) return;
+    
+    const dataSoal = appState.soal[appState.indexAktif];
+    document.getElementById("lblNomorTampil").innerText = appState.indexAktif + 1;
+    document.getElementById("boxPertanyaan").innerText = dataSoal.pertanyaan;
+
+    const imgBox = document.getElementById("boxGambarSoal");
+    if (dataSoal.gambar && String(dataSoal.gambar).trim() !== "") {
+        imgBox.src = dataSoal.gambar;
+        imgBox.style.display = "block";
+    } else {
+        imgBox.style.display = "none";
+    }
+
+    const boxJawaban = document.getElementById("boxJawaban");
+    boxJawaban.innerHTML = "";
+
+    // Ambil data jawaban tersimpan
+    const itemJwb = appState.jawaban.find(j => j.nomor_soal == dataSoal.nomor_soal);
+    const valueJwb = itemJwb ? itemJwb.jawaban : "";
+
+    // Pengecekan Jenis Soal menggunakan Huruf Besar (Sesuai database Anda)
+    const tipeSoal = String(dataSoal.jenis_soal).toUpperCase().trim();
+
+    if (tipeSoal === "PG") {
+        let htmlPG = `<div class="opsi-list">`;
+        
+        // Menyelaraskan pemanggilan properti dengan nama kolom spreadsheet (pilihan_a, pilihan_b, dst)
+        ['a', 'b', 'c', 'd'].forEach(opsi => {
+            const namaPropertiKolom = 'pilihan_' + opsi;
+            const isiOpsi = dataSoal[namaPropertiKolom];
             
-            const dataSoal = appState.soal[appState.indexAktif];
-            document.getElementById("lblNomorTampil").innerText = appState.indexAktif + 1;
-            document.getElementById("boxPertanyaan").innerText = dataSoal.pertanyaan;
-
-            const imgBox = document.getElementById("boxGambarSoal");
-            if (dataSoal.gambar && dataSoal.gambar.trim() !== "") {
-                imgBox.src = dataSoal.gambar;
-                imgBox.style.display = "block";
-            } else {
-                imgBox.style.display = "none";
-            }
-
-            const boxJawaban = document.getElementById("boxJawaban");
-            boxJawaban.innerHTML = "";
-
-            const itemJwb = appState.jawaban.find(j => j.nomor_soal == dataSoal.nomor_soal);
-            const valueJwb = itemJwb ? itemJwb.jawaban : "";
-
-            // MERENDER PILIHAN JAWABAN SECARA DINAMIS
-            if (dataSoal.jenis_soal === "PG") {
-                let htmlPG = `<div class="opsi-list">`;
-                ['a', 'b', 'c', 'd'].forEach(opsi => {
-                    const isiOpsi = dataSoal['pilihan_' + opsi];
-                    if(isiOpsi !== undefined && isiOpsi !== "") {
-                        const isSelected = valueJwb.toLowerCase() === opsi.toLowerCase() ? "selected" : "";
-                        htmlPG += `
-                            <div class="opsi-card ${isSelected}" onclick="catatJawaban('${opsi}')">
-                                <strong>${opsi.toUpperCase()}.</strong> ${isiOpsi}
-                            </div>`;
-                    }
-                });
-                htmlPG += `</div>`;
-                boxJawaban.innerHTML = htmlPG;
-            } else if (dataSoal.jenis_soal === "ISIAN") {
-                boxJawaban.innerHTML = `
-                    <div style="margin-top: 15px;">
-                        <input type="text" id="fieldIsian" value="${valueJwb}" style="text-align: left; width: 100%; box-sizing: border-box;" placeholder="Ketik jawaban singkat kamu di sini..." oninput="catatJawaban(this.value)">
+            if(isiOpsi !== undefined && isiOpsi !== "") {
+                const isSelected = valueJwb.toLowerCase() === opsi.toLowerCase() ? "selected" : "";
+                
+                // Render dengan gaya persis seperti Screenshot 1 (Ada Badge Bulat Huruf Opsi)
+                htmlPG += `
+                    <div class="opsi-card ${isSelected}" onclick="catatJawaban('${opsi}')" style="display: flex; align-items: center; gap: 15px;">
+                        <div style="
+                            width: 32px; height: 32px; 
+                            border-radius: 50%; 
+                            background: ${isSelected ? 'var(--primary-blue)' : '#f1f5f9'}; 
+                            color: ${isSelected ? 'white' : '#64748b'}; 
+                            display: flex; align-items: center; justify-content: center; 
+                            font-weight: bold; border: 1px solid #cbd5e1;">
+                            ${opsi.toUpperCase()}
+                        </div>
+                        <div>${isiOpsi}</div>
                     </div>`;
             }
+        });
+        htmlPG += `</div>`;
+        boxJawaban.innerHTML = htmlPG;
+        
+    } else if (tipeSoal === "ISIAN" || tipeSoal === "ISIAN SINGKAT") {
+        // Render Text Box Isian Singkat dengan styling ramah anak
+        boxJawaban.innerHTML = `
+            <div style="margin-top: 20px;">
+                <label style="display:block; font-size:14px; font-weight:bold; color:#475569; margin-bottom:8px;">Jawaban Kamu:</label>
+                <input type="text" id="fieldIsian" value="${valueJwb}" 
+                    style="text-align: left; width: 100%; max-width: 500px; padding: 12px 15px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 16px; box-sizing: border-box;" 
+                    placeholder="Ketik jawaban singkat di sini..." 
+                    oninput="catatJawaban(this.value)">
+            </div>`;
+    }
 
-            perbaruiStatusGrid();
-        }
+    perbaruiStatusGrid();
+}
 
-        function catatJawaban(nilai) {
-            const dataSoal = appState.soal[appState.indexAktif];
-            let itemJwb = appState.jawaban.find(j => j.nomor_soal == dataSoal.nomor_soal);
-            if (itemJwb) {
-                itemJwb.jawaban = nilai;
-                localStorage.setItem("jawaban", JSON.stringify(appState.jawaban));
+function catatJawaban(nilai) {
+    const dataSoal = appState.soal[appState.indexAktif];
+    let itemJwb = appState.jawaban.find(j => j.nomor_soal == dataSoal.nomor_soal);
+    if (itemJwb) {
+        itemJwb.jawaban = nilai;
+        localStorage.setItem("jawaban", JSON.stringify(appState.jawaban));
+    }
+    // Jika PG, kita re-render untuk melihat efek perubahan warna seleksi secara instan
+    const tipeSoal = String(dataSoal.jenis_soal).toUpperCase().trim();
+    if(tipeSoal === "PG") {
+        tampilkanSoal();
+    } else {
+        perbaruiStatusGrid();
+    }
+}
+
+function buatGridNavigasi() {
+    const containerGrid = document.getElementById("boxGridNomor");
+    containerGrid.innerHTML = "";
+
+    appState.soal.forEach((s, idx) => {
+        const btnNomor = document.createElement("button");
+        btnNomor.className = "box-nomor";
+        btnNomor.id = "nav-no-" + idx;
+        btnNomor.innerText = idx + 1;
+        btnNomor.onclick = function() {
+            lompatKeSoal(idx);
+        };
+        containerGrid.appendChild(btnNomor);
+    });
+    perbaruiStatusGrid();
+}
+
+function perbaruiStatusGrid() {
+    appState.soal.forEach((s, idx) => {
+        const el = document.getElementById("nav-no-" + idx);
+        if (el) {
+            el.classList.remove("sudah-jawab", "aktif");
+
+            const itemJwb = appState.jawaban.find(j => j.nomor_soal == s.nomor_soal);
+            if (itemJwb && String(itemJwb.jawaban).trim() !== "") {
+                el.classList.add("sudah-jawab"); 
             }
-            if(dataSoal.jenis_soal === "PG") {
-                tampilkanSoal();
+
+            if (idx === appState.indexAktif) {
+                el.classList.add("aktif"); 
+            }
+        }
+    });
+}
+
+function lompatKeSoal(indexTarget) {
+    if (indexTarget >= 0 && indexTarget < appState.soal.length) {
+        appState.indexAktif = indexTarget;
+        tampilkanSoal();
+    }
+}
+
+function navigasiSoal(arah) {
+    lompatKeSoal(appState.indexAktif + arah);
+}
+
+function hitungDanSelesai(isAutoSubmit = false) {
+    if (!isAutoSubmit) {
+        if (!confirm("Apakah kamu yakin ingin mengakhiri sesi ujian dan mengirim semua jawaban?")) return;
+    }
+
+    clearInterval(intervalTimer);
+    document.getElementById("examLayout").style.opacity = "0.4";
+
+    fetch(WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({
+            action: "submitUjian",
+            id_peserta: appState.id_peserta,
+            nama_lengkap: appState.nama_lengkap,
+            jawaban: appState.jawaban
+        })
+    })
+    .then(res => res.json())
+    .then(response => {
+        if (response.status === "success") {
+            const skor = response.nilai;
+            let narasiPesan = "";
+
+            if (skor >= 80) {
+                narasiPesan = `Hebat sekali kamu <strong>${appState.nama_lengkap}</strong>! Kamu Luar Biasa. Nilai kamu <strong>${skor}</strong>. Semangat belajar!`;
+            } else if (skor >= 60) {
+                narasiPesan = `Bagus sekali kamu <strong>${appState.nama_lengkap}</strong>! Kamu Pintar. Nilai kamu <strong>${skor}</strong>. Semangat belajar!`;
             } else {
-                perbaruiStatusGrid();
-            }
-        }
-
-        // MEMBUAT GRID NOMOR NAVIGASI SOAL DI PANEL KANAN
-        function buatGridNavigasi() {
-            const containerGrid = document.getElementById("boxGridNomor");
-            containerGrid.innerHTML = "";
-
-            appState.soal.forEach((s, idx) => {
-                const btnNomor = document.createElement("button");
-                btnNomor.className = "box-nomor";
-                btnNomor.id = "nav-no-" + idx;
-                btnNomor.innerText = idx + 1;
-                btnNomor.onclick = function() {
-                    lompatKeSoal(idx);
-                };
-                containerGrid.appendChild(btnNomor);
-            });
-            perbaruiStatusGrid();
-        }
-
-        // MEMPERBARUI INDIKATOR WARNA MAP GRIDS NOMOR
-        function perbaruiStatusGrid() {
-            appState.soal.forEach((s, idx) => {
-                const el = document.getElementById("nav-no-" + idx);
-                if (el) {
-                    // Reset kelas bawaan
-                    el.classList.remove("sudah-jawab", "aktif");
-
-                    const itemJwb = appState.jawaban.find(j => j.nomor_soal == s.nomor_soal);
-                    if (itemJwb && itemJwb.jawaban.trim() !== "") {
-                        el.classList.add("sudah-jawab"); // Warna biru jika diisi
-                    }
-
-                    if (idx === appState.indexAktif) {
-                        el.classList.add("aktif"); // Border kuning penanda posisi aktif
-                    }
-                }
-            });
-        }
-
-        function lompatKeSoal(indexTarget) {
-            if (indexTarget >= 0 && indexTarget < appState.soal.length) {
-                appState.indexAktif = indexTarget;
-                tampilkanSoal();
-            }
-        }
-
-        function navigasiSoal(arah) {
-            lompatKeSoal(appState.indexAktif + arah);
-        }
-
-        function hitungDanSelesai(isAutoSubmit = false) {
-            if (!isAutoSubmit) {
-                if (!confirm("Apakah kamu yakin ingin mengakhiri sesi ujian dan mengirim semua jawaban?")) return;
+                narasiPesan = `Jangan berkecil hati <strong>${appState.nama_lengkap}</strong>! Kamu Anak Hebat. Nilai kamu <strong>${skor}</strong>. Semangat belajar!`;
             }
 
-            clearInterval(intervalTimer);
-            document.getElementById("examLayout").style.opacity = "0.4";
-
-            fetch(WEB_APP_URL, {
-                method: "POST",
-                body: JSON.stringify({
-                    action: "submitUjian",
-                    id_peserta: appState.id_peserta,
-                    nama_lengkap: appState.nama_lengkap,
-                    jawaban: appState.jawaban
-                })
-            })
-            .then(res => res.json())
-            .then(response => {
-                if (response.status === "success") {
-                    const skor = response.nilai;
-                    let narasiPesan = "";
-
-                    if (skor >= 80) {
-                        narasiPesan = `Hebat sekali kamu <strong>${appState.nama_lengkap}</strong>! Kamu Luar Biasa. Nilai kamu <strong>${skor}</strong>. Semangat belajar!`;
-                    } else if (skor >= 60) {
-                        narasiPesan = `Bagus sekali kamu <strong>${appState.nama_lengkap}</strong>! Kamu Pintar. Nilai kamu <strong>${skor}</strong>. Semangat belajar!`;
-                    } else {
-                        narasiPesan = `Jangan berkecil hati <strong>${appState.nama_lengkap}</strong>! Kamu Anak Hebat. Nilai kamu <strong>${skor}</strong>. Semangat belajar!`;
-                    }
-
-                    document.getElementById("narasiHasil").innerHTML = narasiPesan;
-                    document.getElementById("hasilModal").style.display = "flex";
-                    localStorage.clear();
-                } else {
-                    alert("Terjadi kendala: " + response.message);
-                    document.getElementById("examLayout").style.opacity = "1";
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                alert("Koneksi gagal mengirim paket data.");
-                document.getElementById("examLayout").style.opacity = "1";
-            });
+            document.getElementById("narasiHasil").innerHTML = narasiPesan;
+            document.getElementById("hasilModal").style.display = "flex";
+            localStorage.clear();
+        } else {
+            alert("Terjadi kendala: " + response.message);
+            document.getElementById("examLayout").style.opacity = "1";
         }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Koneksi gagal mengirim paket data.");
+        document.getElementById("examLayout").style.opacity = "1";
+    });
+}
 
-        function selesaiSesi() {
-            location.reload();
-        }
+function selesaiSesi() {
+    location.reload();
+}
     </script>
 </body>
 </html>
