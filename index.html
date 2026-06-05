@@ -192,7 +192,7 @@
     </div>
 
     <script>
-        // URL Web App Google Apps Script Anda
+    // URL Web App Google Apps Script Anda (Tetap Sama)
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwrFgHtmOeGSXRZrbHSoNcT1CpWh4leleEKsZw7wdWUgNihJxKndxwMPP3DBT128aWGWg/exec";
 
 let appState = {
@@ -226,7 +226,7 @@ function aktifkanKameraPengawas() {
             video.srcObject = stream;
         })
         .catch(function(err) {
-            console.log("Akses kamera ditolak atau tidak tersedia: ", err);
+            console.log("Akses kamera ditolak/tidak ditemukan.");
         });
     }
 }
@@ -244,7 +244,7 @@ function mulaiTimerUjian() {
         if (sisaWaktu <= 0) {
             clearInterval(intervalTimer);
             document.getElementById("lblTimer").innerText = "00:00:00";
-            alert("Waktu ujian telah habis! Sistem otomatis mengirimkan jawaban Anda.");
+            alert("Waktu ujian habis! Jawaban otomatis dikirim.");
             hitungDanSelesai(true);
             return;
         }
@@ -293,9 +293,9 @@ function prosesLogin() {
             appState.id_peserta = response.id_peserta;
             appState.nama_lengkap = inputNama;
             
-            // Shuffling acak soal
-            appState.soal = response.soal.sort(() => Math.random() - 0.5);
-            appState.jawaban = appState.soal.map(s => ({ nomor_soal: s.nomor_soal, jawaban: "" }));
+            // Simpan data mentah asli, pengacakan dilakukan berbasis index navigasi saja
+            appState.soal = response.soal;
+            appState.jawaban = appState.soal.map(s => ({ nomor_soal: String(s.nomor_soal).trim(), jawaban: "" }));
 
             localStorage.setItem("id_peserta", appState.id_peserta);
             localStorage.setItem("nama_lengkap", appState.nama_lengkap);
@@ -330,18 +330,23 @@ function bukaHalamanUjian() {
 }
 
 // ====================================================================
-// FUNGSI UTAMA RENDER SOAL (SUDAH DIPERBAIKI SESUAI STRUKTUR KOLOM)
+// FUNGSI RENDER UTAMA - ANTI-GAGAL TIPE DATA (PILIHAN JAWABAN & ISIAN)
 // ====================================================================
 function tampilkanSoal() {
     if(appState.soal.length === 0) return;
     
     const dataSoal = appState.soal[appState.indexAktif];
-    document.getElementById("lblNomorTampil").innerText = appState.indexAktif + 1;
-    document.getElementById("boxPertanyaan").innerText = dataSoal.pertanyaan;
+    
+    // Cetak log di Console Browser (F12) untuk mendeteksi isi objek asli dari Sheets jika ada kendala
+    console.log("Data Soal Aktif:", dataSoal);
 
+    document.getElementById("lblNomorTampil").innerText = appState.indexAktif + 1;
+    document.getElementById("boxPertanyaan").innerText = dataSoal.pertanyaan || "";
+
+    // Render Gambar
     const imgBox = document.getElementById("boxGambarSoal");
     if (dataSoal.gambar && String(dataSoal.gambar).trim() !== "") {
-        imgBox.src = dataSoal.gambar;
+        imgBox.src = String(dataSoal.gambar).trim();
         imgBox.style.display = "block";
     } else {
         imgBox.style.display = "none";
@@ -350,25 +355,24 @@ function tampilkanSoal() {
     const boxJawaban = document.getElementById("boxJawaban");
     boxJawaban.innerHTML = "";
 
-    // Ambil data jawaban tersimpan
-    const itemJwb = appState.jawaban.find(j => j.nomor_soal == dataSoal.nomor_soal);
+    // Ambil Pencocokan Jawaban (Dipaksa konversi ke String agar tipe data COCOK)
+    const idSoalSekarang = String(dataSoal.nomor_soal).trim();
+    const itemJwb = appState.jawaban.find(j => String(j.nomor_soal).trim() === idSoalSekarang);
     const valueJwb = itemJwb ? itemJwb.jawaban : "";
 
-    // Pengecekan Jenis Soal menggunakan Huruf Besar (Sesuai database Anda)
-    const tipeSoal = String(dataSoal.jenis_soal).toUpperCase().trim();
+    // Ambil Tipe Soal (Bersihkan dari Spasi liar/Caps Lock)
+    const tipeSoal = dataSoal.jenis_soal ? String(dataSoal.jenis_soal).toUpperCase().trim() : "";
 
     if (tipeSoal === "PG") {
         let htmlPG = `<div class="opsi-list">`;
         
-        // Menyelaraskan pemanggilan properti dengan nama kolom spreadsheet (pilihan_a, pilihan_b, dst)
         ['a', 'b', 'c', 'd'].forEach(opsi => {
-            const namaPropertiKolom = 'pilihan_' + opsi;
-            const isiOpsi = dataSoal[namaPropertiKolom];
+            // Mencari nama properti secara fleksibel (baik huruf kecil pilihan_a maupun huruf besar PILIHAN_A)
+            const isiOpsi = dataSoal['pilihan_' + opsi] || dataSoal['PILIHAN_' + opsi.toUpperCase()] || "";
             
-            if(isiOpsi !== undefined && isiOpsi !== "") {
-                const isSelected = valueJwb.toLowerCase() === opsi.toLowerCase() ? "selected" : "";
+            if(isiOpsi !== undefined && String(isiOpsi).trim() !== "") {
+                const isSelected = valueJwb.toLowerCase().trim() === opsi.toLowerCase().trim() ? "selected" : "";
                 
-                // Render dengan gaya persis seperti Screenshot 1 (Ada Badge Bulat Huruf Opsi)
                 htmlPG += `
                     <div class="opsi-card ${isSelected}" onclick="catatJawaban('${opsi}')" style="display: flex; align-items: center; gap: 15px;">
                         <div style="
@@ -377,7 +381,7 @@ function tampilkanSoal() {
                             background: ${isSelected ? 'var(--primary-blue)' : '#f1f5f9'}; 
                             color: ${isSelected ? 'white' : '#64748b'}; 
                             display: flex; align-items: center; justify-content: center; 
-                            font-weight: bold; border: 1px solid #cbd5e1;">
+                            font-weight: bold; border: 1px solid #cbd5e1; flex-shrink: 0;">
                             ${opsi.toUpperCase()}
                         </div>
                         <div>${isiOpsi}</div>
@@ -387,8 +391,8 @@ function tampilkanSoal() {
         htmlPG += `</div>`;
         boxJawaban.innerHTML = htmlPG;
         
-    } else if (tipeSoal === "ISIAN" || tipeSoal === "ISIAN SINGKAT") {
-        // Render Text Box Isian Singkat dengan styling ramah anak
+    } else if (tipeSoal === "ISIAN" || tipeSoal === "ISIAN SINGKAT" || tipeSoal === "") {
+        // Default / Jika tipe soal isian singkat
         boxJawaban.innerHTML = `
             <div style="margin-top: 20px;">
                 <label style="display:block; font-size:14px; font-weight:bold; color:#475569; margin-bottom:8px;">Jawaban Kamu:</label>
@@ -404,13 +408,14 @@ function tampilkanSoal() {
 
 function catatJawaban(nilai) {
     const dataSoal = appState.soal[appState.indexAktif];
-    let itemJwb = appState.jawaban.find(j => j.nomor_soal == dataSoal.nomor_soal);
+    const idSoalSekarang = String(dataSoal.nomor_soal).trim();
+    let itemJwb = appState.jawaban.find(j => String(j.nomor_soal).trim() === idSoalSekarang);
     if (itemJwb) {
         itemJwb.jawaban = nilai;
         localStorage.setItem("jawaban", JSON.stringify(appState.jawaban));
     }
-    // Jika PG, kita re-render untuk melihat efek perubahan warna seleksi secara instan
-    const tipeSoal = String(dataSoal.jenis_soal).toUpperCase().trim();
+    
+    const tipeSoal = dataSoal.jenis_soal ? String(dataSoal.jenis_soal).toUpperCase().trim() : "";
     if(tipeSoal === "PG") {
         tampilkanSoal();
     } else {
@@ -441,7 +446,8 @@ function perbaruiStatusGrid() {
         if (el) {
             el.classList.remove("sudah-jawab", "aktif");
 
-            const itemJwb = appState.jawaban.find(j => j.nomor_soal == s.nomor_soal);
+            const idSoalSekarang = String(s.nomor_soal).trim();
+            const itemJwb = appState.jawaban.find(j => String(j.nomor_soal).trim() === idSoalSekarang);
             if (itemJwb && String(itemJwb.jawaban).trim() !== "") {
                 el.classList.add("sudah-jawab"); 
             }
@@ -466,7 +472,7 @@ function navigasiSoal(arah) {
 
 function hitungDanSelesai(isAutoSubmit = false) {
     if (!isAutoSubmit) {
-        if (!confirm("Apakah kamu yakin ingin mengakhiri sesi ujian dan mengirim semua jawaban?")) return;
+        if (!confirm("Apakah kamu yakin ingin mengakhiri sesi ujian?")) return;
     }
 
     clearInterval(intervalTimer);
