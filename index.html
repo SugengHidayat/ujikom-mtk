@@ -80,17 +80,16 @@
         .btn-playful:hover { transform: translateY(-4px); box-shadow: 0 10px 0 var(--dark-blue); }
         .btn-playful:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--dark-blue); }
 
-        /* --- ARSITEKTUR LAYOUT POTRET (MOBILE-FIRST) --- */
+        /* --- ARSITEKTUR LAYOUT POTRET --- */
         .main-container { 
             display: none; 
-            flex-direction: column; /* Mengubah layout menjadi baris vertikal (Potret) */
+            flex-direction: column; 
             width: 100%;
-            max-width: 500px; /* Batas lebar maksimal setara layar smartphone besar / tablet potret */
+            max-width: 500px; 
             gap: 15px; 
             margin: 0 auto;
         }
 
-        /* Blok Info Atas (Kamera, Nama, Timer) */
         .sidebar { 
             background: white; 
             padding: 15px; 
@@ -102,7 +101,6 @@
             gap: 10px;
         }
 
-        /* Blok Utama Konten Soal */
         .soal-container { 
             background: white; 
             padding: 20px; 
@@ -110,7 +108,7 @@
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
         }
 
-        /* --- PILIHAN JAWABAN (RESPONSIF VERTIKAL) --- */
+        /* --- PILIHAN JAWABAN VERTIKAL --- */
         .opsi-list { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
         .opsi-card { 
             padding: 14px 16px; 
@@ -123,14 +121,21 @@
             display: flex; 
             align-items: center; 
             background: #ffffff;
+            user-select: none;
         }
         .opsi-card:hover { background: #f1f5f9; border-color: #cbd5e1; }
         .opsi-card.selected { background: #eff6ff; border-color: var(--primary-blue); font-weight: bold; }
 
+        /* Badge Instruksi Khusus PG Kompleks */
+        .badge-instruksi {
+            background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa;
+            padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; margin-bottom: 12px;
+        }
+
         .img-soal { 
             max-width: 100%; 
             height: auto;
-            max-height: 200px; /* Sedikit diperkecil agar pas dalam satu genggaman layar potret */
+            max-height: 200px; 
             object-fit: contain; 
             border-radius: 10px; 
             margin: 10px auto; 
@@ -141,16 +146,14 @@
         }
         .loading { font-size: 14px; color: #64748b; margin-top: 10px; display: none; }
 
-        /* --- NAVIGASI BAWAH SOAL --- */
         .nav-buttons { display: flex; justify-content: space-between; margin-top: 25px; gap: 10px; }
         .btn-nav { flex: 1; background: #64748b; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; text-align: center; }
 
-        /* --- MINI PROFIL KAMERA VIDEO --- */
         .camera-box { 
             width: 90px; 
             height: 90px; 
             background: #000; 
-            border-radius: 50%; /* Mengubah kamera menjadi bulat kecil di pojok top-layout */
+            border-radius: 50%; 
             overflow: hidden; 
             transform: scaleX(-1); 
             margin: 0 auto;
@@ -158,10 +161,8 @@
         }
         .camera-box video { width: 100%; height: 100%; object-fit: cover; }
 
-        /* --- TIMER COUNTDOWN --- */
         .timer-badge { font-size: 20px; font-weight: bold; color: #dc2626; background: #fee2e2; padding: 8px; border-radius: 8px; margin: 5px auto; font-family: monospace; width: fit-content; }
 
-        /* --- GRID NOMOR NAVIGASI --- */
         .grid-nomor { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 10px; }
         .box-nomor { padding: 8px 0; background: white; border: 2px solid #cbd5e1; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 13px; }
         .box-nomor:hover { border-color: var(--primary-blue); }
@@ -204,10 +205,8 @@
         </div>
     </div>
 
-    <!-- LAYOUT UTAMA SEKARANG BERBASIS VERTIKAL (POTRET) -->
     <div class="main-container" id="examLayout">
         
-        <!-- SIDEBAR ATAS: Berisi Status Kamera, Timer & Nama Siswa -->
         <div class="sidebar">
             <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
                 <div class="camera-box">
@@ -221,14 +220,14 @@
             <div class="timer-badge" id="lblTimer">02:00:00</div>
         </div>
 
-        <!-- CONTAINER TENGAH: Lembar Pertanyaan & Jawaban -->
         <div class="soal-container">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">
-                <span style="background: #dbeafe; color: var(--primary-blue); font-weight: bold; padding: 4px 12px; border-radius: 20px; font-size: 12px;">MATEMATIKA</span>
+                <span id="lblBadgeMapel" style="background: #dbeafe; color: var(--primary-blue); font-weight: bold; padding: 4px 12px; border-radius: 20px; font-size: 12px;">MATEMATIKA</span>
                 <span style="font-weight: bold; color: #64748b; font-size: 14px;">Soal: <span id="lblNomorTampil">1</span></span>
             </div>
             
             <div style="margin-top: 15px;">
+                <div id="boxInstruksiKompleks" class="badge-instruksi" style="display: none;">💡 Kamu bisa memilih lebih dari satu jawaban benar!</div>
                 <img id="boxGambarSoal" class="img-soal" src="" style="display: none;" alt="Visual Soal">
                 <p id="boxPertanyaan" style="font-size: 16px; font-weight: 500; line-height: 1.5; min-height: 40px; margin-bottom: 15px;"></p>
                 <div id="boxJawaban"></div>
@@ -240,7 +239,6 @@
             </div>
         </div>
 
-        <!-- GRID BAWAH: Navigasi Cepat Nomor Soal & Tombol Selesai -->
         <div class="sidebar" style="padding: 15px;">
             <div style="text-align: left; font-weight: bold; font-size: 13px; color: #475569;">Peta Nomor Soal:</div>
             <div class="grid-nomor" id="boxGridNomor"></div>
@@ -274,12 +272,10 @@
             }
         };
 
-        // --- ANTI TAB-SWITCHING SYSTEM ---
         document.addEventListener("visibilitychange", function() {
             if (document.getElementById("examLayout").style.display === "flex" && document.hidden) {
                 kecuranganCount++;
                 alert(`⚠️ PERINGATAN [${kecuranganCount}/3]: Jangan keluar dari aplikasi! Ujianmu bisa dibatalkan otomatis.`);
-                
                 if (kecuranganCount >= 3) {
                     alert("Kamu melanggar aturan sebanyak 3 kali. Aplikasi melakukan submit otomatis.");
                     hitungDanSelesai(true);
@@ -296,12 +292,8 @@
             const video = document.getElementById("webcamVideo");
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-                .then(function(stream) {
-                    video.srcObject = stream;
-                })
-                .catch(function(err) {
-                    console.log("Akses kamera tidak aktif.");
-                });
+                .then(function(stream) { video.srcObject = stream; })
+                .catch(function(err) { console.log("Akses kamera tidak aktif."); });
             }
         }
 
@@ -314,7 +306,6 @@
 
             function updateTimer() {
                 const sisaWaktu = appState.waktuSelesai - Date.now();
-
                 if (sisaWaktu <= 0) {
                     clearInterval(intervalTimer);
                     document.getElementById("lblTimer").innerText = "00:00:00";
@@ -322,15 +313,11 @@
                     hitungDanSelesai(true);
                     return;
                 }
-
                 const jam = Math.floor((sisaWaktu / (1000 * 60 * 60)) % 24);
                 const menit = Math.floor((sisaWaktu / (1000 * 60)) % 60);
                 const detik = Math.floor((sisaWaktu / 1000) % 60);
-
-                document.getElementById("lblTimer").innerText = 
-                    `${String(jam).padStart(2,'0')}:${String(menit).padStart(2,'0')}:${String(detik).padStart(2,'0')}`;
+                document.getElementById("lblTimer").innerText = `${String(jam).padStart(2,'0')}:${String(menit).padStart(2,'0')}:${String(detik).padStart(2,'0')}`;
             }
-
             updateTimer();
             intervalTimer = setInterval(updateTimer, 1000);
         }
@@ -391,7 +378,7 @@
 
         function bukaHalamanUjian() {
             document.getElementById("loginModal").style.display = "none";
-            document.getElementById("examLayout").style.display = "flex"; // Mengaktifkan flex potret
+            document.getElementById("examLayout").style.display = "flex"; 
             document.getElementById("lblNamaSiswa").innerText = appState.nama_lengkap;
             document.getElementById("lblIdSiswa").innerText = appState.id_peserta;
             
@@ -408,6 +395,7 @@
             document.getElementById("lblNomorTampil").innerText = appState.indexAktif + 1;
             document.getElementById("boxPertanyaan").innerText = dataSoal.pertanyaan || "";
 
+            // Deteksi Gambar Utama Soal
             const imgBox = document.getElementById("boxGambarSoal");
             if (dataSoal.gambar && String(dataSoal.gambar).trim() !== "") {
                 imgBox.src = String(dataSoal.gambar).trim();
@@ -424,27 +412,61 @@
             const valueJwb = itemJwb ? itemJwb.jawaban : "";
 
             const tipeSoal = dataSoal.jenis_soal ? String(dataSoal.jenis_soal).toUpperCase().trim() : "";
+            const instruksiKompleks = document.getElementById("boxInstruksiKompleks");
 
-            if (tipeSoal === "PG" || tipeSoal.includes("PILIHAN GANDA")) {
-                let htmlPG = `<div class="opsi-list">`;
+            // LOGIKA PEMILIHAN RENDER UI BERDASARKAN TIPE SOAL
+            if (tipeSoal === "PG_KOMPLEKS" || tipeSoal === "PILIHAN GANDA KOMPLEKS") {
+                instruksiKompleks.style.display = "block";
+                document.getElementById("lblBadgeMapel").innerText = "PG KOMPLEKS";
+                
+                // Pecah string jawaban lama (misal "a,c" menjadi array ['a', 'c'])
+                const arrayJawabanSiswa = valueJwb !== "" ? valueJwb.split(",") : [];
+                let htmlPGK = `<div class="opsi-list">`;
                 
                 ['a', 'b', 'c', 'd'].forEach(opsi => {
                     const isiOpsi = dataSoal['pilihan_' + opsi] || dataSoal['PILIHAN_' + opsi.toUpperCase()] || "";
-                    
+                    if (isiOpsi !== undefined && String(isiOpsi).trim() !== "") {
+                        const isSelected = arrayJawabanSiswa.includes(opsi) ? "selected" : "";
+                        let kontenOpsi = String(isiOpsi).trim().startsWith("http") 
+                            ? `<img src="${String(isiOpsi).trim()}" style="max-height: 100px; max-width: 100%; object-fit: contain; border-radius: 6px;" alt="Opsi">` 
+                            : `<div>${isiOpsi}</div>`;
+                        
+                        // Gunakan bentuk UI Kotak Centang (Square Box) untuk PG Kompleks
+                        htmlPGK += `
+                            <div class="opsi-card ${isSelected}" onclick="catatJawabanKompleks('${opsi}')" style="gap: 12px; padding: 10px 15px;">
+                                <div style="
+                                    width: 24px; height: 24px; 
+                                    border-radius: 6px; 
+                                    background: ${isSelected ? 'var(--primary-blue)' : '#f1f5f9'}; 
+                                    color: ${isSelected ? 'white' : '#64748b'}; 
+                                    display: flex; align-items: center; justify-content: center; 
+                                    font-weight: bold; border: 2px solid #cbd5e1; flex-shrink: 0; font-size: 12px;">
+                                    ${isSelected ? '✓' : ''}
+                                </div>
+                                <div style="font-weight: bold; color: #475569;">${opsi.toUpperCase()}.</div>
+                                <div style="flex-grow: 1;">${kontenOpsi}</div>
+                            </div>`;
+                    }
+                });
+                htmlPGK += `</div>`;
+                boxJawaban.innerHTML = htmlPGK;
+
+            } else if (tipeSoal === "PG" || tipeSoal.includes("PILIHAN GANDA")) {
+                instruksiKompleks.style.display = "none";
+                document.getElementById("lblBadgeMapel").innerText = "MATEMATIKA";
+                
+                let htmlPG = `<div class="opsi-list">`;
+                ['a', 'b', 'c', 'd'].forEach(opsi => {
+                    const isiOpsi = dataSoal['pilihan_' + opsi] || dataSoal['PILIHAN_' + opsi.toUpperCase()] || "";
                     if (isiOpsi !== undefined && String(isiOpsi).trim() !== "") {
                         const isSelected = valueJwb.toLowerCase().trim() === opsi.toLowerCase().trim() ? "selected" : "";
-                        let kontenOpsi = "";
-                        const teksClean = String(isiOpsi).trim();
+                        let kontenOpsi = String(isiOpsi).trim().startsWith("http") 
+                            ? `<img src="${String(isiOpsi).trim()}" style="max-height: 100px; max-width: 100%; object-fit: contain; border-radius: 6px;" alt="Opsi">` 
+                            : `<div>${isiOpsi}</div>`;
                         
-                        // Render Gambar di Pilihan Jawaban jika format berupa URL CDN
-                        if (teksClean.startsWith("http://") || teksClean.startsWith("https://")) {
-                            kontenOpsi = `<img src="${teksClean}" style="max-height: 100px; max-width: 100%; object-fit: contain; border-radius: 6px; margin: 3px 0;" alt="Opsi ${opsi.toUpperCase()}">`;
-                        } else {
-                            kontenOpsi = `<div>${isiOpsi}</div>`;
-                        }
-                        
+                        // Gunakan bentuk UI Bulat (Radio Style) untuk PG Biasa
                         htmlPG += `
-                            <div class="opsi-card ${isSelected}" onclick="catatJawaban('${opsi}')" style="gap: 12px; padding: 10px 15px;">
+                            <div class="opsi-card ${isSelected}" onclick="catatJawabanBiasa('${opsi}')" style="gap: 12px; padding: 10px 15px;">
                                 <div style="
                                     width: 30px; height: 30px; 
                                     border-radius: 50%; 
@@ -461,21 +483,25 @@
                 htmlPG += `</div>`;
                 boxJawaban.innerHTML = htmlPG;
                 
-            } else if (tipeSoal === "ISIAN" || tipeSoal === "ISIAN SINGKAT" || tipeSoal === "") {
+            } else {
+                // Tipe Soal Isian Singkat
+                instruksiKompleks.style.display = "none";
+                document.getElementById("lblBadgeMapel").innerText = "MATEMATIKA";
                 boxJawaban.innerHTML = `
                     <div style="margin-top: 15px;">
                         <label style="display:block; font-size:13px; font-weight:bold; color:#475569; margin-bottom:6px;">Jawaban Kamu:</label>
                         <input type="text" id="fieldIsian" value="${valueJwb}" 
                             style="text-align: left; width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 15px; box-sizing: border-box;" 
                             placeholder="Ketik di sini..." 
-                            oninput="catatJawaban(this.value)">
+                            oninput="catatJawabanBiasa(this.value)">
                     </div>`;
             }
 
             perbaruiStatusGrid();
         }
 
-        function catatJawaban(nilai) {
+        // Handler pengisian PG Biasa & Isian
+        function catatJawabanBiasa(nilai) {
             const dataSoal = appState.soal[appState.indexAktif];
             const idSoalSekarang = String(dataSoal.nomor_soal).trim();
             let itemJwb = appState.jawaban.find(j => String(j.nomor_soal).trim() === idSoalSekarang);
@@ -492,18 +518,41 @@
             }
         }
 
+        // Handler khusus PG Kompleks (bisa multi-select / mencentang lebih dari satu)
+        function catatJawabanKompleks(opsi) {
+            const dataSoal = appState.soal[appState.indexAktif];
+            const idSoalSekarang = String(dataSoal.nomor_soal).trim();
+            let itemJwb = appState.jawaban.find(j => String(j.nomor_soal).trim() === idSoalSekarang);
+            
+            if (itemJwb) {
+                let arrayJawaban = itemJwb.jawaban !== "" ? itemJwb.jawaban.split(",") : [];
+                
+                if (arrayJawaban.includes(opsi)) {
+                    // Jika opsi sudah dipilih, hapus dari daftar (uncheck)
+                    arrayJawaban = arrayJawaban.filter(item => item !== opsi);
+                } else {
+                    // Jika belum dipilih, tambahkan ke daftar (check)
+                    arrayJawaban.push(opsi);
+                }
+                
+                // Urutkan alfabetis agar rapi (misal: 'a,c' bukan 'c,a') lalu gabungkan kembali dengan koma
+                arrayJawaban.sort();
+                itemJwb.jawaban = arrayJawaban.join(",");
+                
+                localStorage.setItem("jawaban", JSON.stringify(appState.jawaban));
+                tampilkanSoal();
+            }
+        }
+
         function buatGridNavigasi() {
             const containerGrid = document.getElementById("boxGridNomor");
             containerGrid.innerHTML = "";
-
             appState.soal.forEach((s, idx) => {
                 const btnNomor = document.createElement("button");
                 btnNomor.className = "box-nomor";
                 btnNomor.id = "nav-no-" + idx;
                 btnNomor.innerText = idx + 1;
-                btnNomor.onclick = function() {
-                    lompatKeSoal(idx);
-                };
+                btnNomor.onclick = function() { lompatKeSoal(idx); };
                 containerGrid.appendChild(btnNomor);
             });
             perbaruiStatusGrid();
@@ -514,16 +563,12 @@
                 const el = document.getElementById("nav-no-" + idx);
                 if (el) {
                     el.classList.remove("sudah-jawab", "aktif");
-
                     const idSoalSekarang = String(s.nomor_soal).trim();
                     const itemJwb = appState.jawaban.find(j => String(j.nomor_soal).trim() === idSoalSekarang);
                     if (itemJwb && String(itemJwb.jawaban).trim() !== "") {
                         el.classList.add("sudah-jawab"); 
                     }
-
-                    if (idx === appState.indexAktif) {
-                        el.classList.add("aktif"); 
-                    }
+                    if (idx === appState.indexAktif) { el.classList.add("aktif"); }
                 }
             });
         }
